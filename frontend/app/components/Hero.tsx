@@ -10,7 +10,9 @@ const features = [
 
 export default function Hero() {
   return (
-    <section className='relative h-screen flex justify-center'>
+    <section 
+    id='hero'
+    className='relative h-screen flex justify-center'>
       <div className='pointer-events-none'>
       <BlurBackground />
       </div>

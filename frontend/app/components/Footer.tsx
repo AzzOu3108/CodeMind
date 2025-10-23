@@ -27,34 +27,37 @@ export default function Footer() {
        </div>
        
        <div>
-       <div className='grid grid-cols-2 text-center gap-6 pb-3'>
+       <div className='grid grid-cols-2 text-center gap-6 pb-3 lg:grid-cols-3'>
 
-      <div>
-       <p className='font-semibold'>Quick Links</p>
-       <ul className='pl-6'>
-         <li className=' '>
+      <div className="text-center">
+        <p className="font-semibold">Quick Links</p>
+        <ul className="text-left inline-block list-disc pl-5">
+         <li>
+          <a href="#hero">Home</a>
+          </li>
+         <li>
           <a href="#features">Features</a>
-          </li>
-         <li className=''>
+         </li>
+         <li>
           <a href="#courses">Courses</a>
-          </li>
-         <li className=''>
+         </li>
+         <li>
           <a href="#about">About</a>
-          </li>
-       </ul>
+         </li>
+        </ul>
       </div>
 
-      <div> 
+      <div className='text-left pl-9'> 
        <p className='font-semibold'>Legal</p>
-       <ul className='pl-6'>
-        <li className='list-disc list-item'>Privacy Policy</li>
-        <li className='list-disc list-item'>Privacy Policy</li>
+       <ul className='text-left inline-block list-disc pl-6'>
+        <li className=''>Privacy Policy</li>
+        <li className=''>Terms of Service</li>
        </ul>
        </div>
-      </div>
+      
 
-      <div>
-        <p className='font-semibold flex justify-center'>Follow Us</p>
+      <div className='flex flex-col items-center justify-center col-span-2 lg:col-auto'>
+        <p className='font-semibold'>Follow Us</p>
         <ul className='flex justify-center space-x-5 '>
           <li>
             <a href="https://www.linkedin.com/">
@@ -72,6 +75,7 @@ export default function Footer() {
             </a>
           </li>
         </ul>
+      </div>
       </div>
       </div>
       </div>
