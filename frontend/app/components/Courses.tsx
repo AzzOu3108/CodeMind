@@ -1,6 +1,7 @@
 import React from 'react'
 import BlurBackground from './ui/BlurBackground'
 import CoursesCards from './cards/CoursesCards'
+import Button from './ui/Button'
 
 export default function Courses() {
   return (
@@ -26,12 +27,13 @@ export default function Courses() {
       </div>
 
       <div className='flex justify-center mt-10'>
-      <button 
+      <Button
       type="button"
-      aria-label="Get started for free"
-      className=' px-6 py-4 2xl:px-7 2xl:py-5 2xl:text-xl shadow-xl bg-primary font-bold rounded-full text-white hover:bg-primary hover:opacity-90 transition-opacity duration-300 ease-in-out cursor-pointer'>
+      aria-label="Explore Courses"
+      size='lg'
+      className='shadow-xl font-bold'>
         Explore Courses
-      </button>
+      </Button>
       </div>
       
     </section>

@@ -1,6 +1,7 @@
 import React from 'react'
 import BlurBackground from './ui/BlurBackground'
 import AboutChartCard from './cards/AboutChartCard'
+import Button from './ui/Button'
 
 export default function About() {
   return (
@@ -33,12 +34,13 @@ export default function About() {
      </div>
      
      <div className="mt-12 md:mt-24 text-center">
-      <button 
+      <Button 
       type="button"
-      aria-label="Get started for free"
-      className=' px-6 py-4 2xl:px-7 2xl:py-5 2xl:text-xl shadow-xl bg-primary font-bold rounded-full text-white hover:bg-primary hover:opacity-90 transition-opacity duration-300 ease-in-out cursor-pointer'>
+      aria-label="Join Us Now"
+      size='md'
+      className='shadow-xl font-bold'>
         Join Us Now
-      </button>
+      </Button>
       </div>
     </section>
   )

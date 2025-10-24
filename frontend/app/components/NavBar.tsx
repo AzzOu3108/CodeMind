@@ -2,6 +2,7 @@ import { HeadCircuitIcon } from "@phosphor-icons/react"
 import { motion,AnimatePresence } from "framer-motion"
 import { Menu } from "lucide-react"
 import { useState } from "react"
+import Button from "./ui/Button"
 
 export default function NavBar() {
   const [open, setOpen] = useState<boolean>(false)
@@ -36,12 +37,12 @@ export default function NavBar() {
         </ul>
 
       <div className="hidden md:flex pt-2 font-bold space-x-4 2xl:text-xl">
-         <button type="button" className="cursor-pointer">
+         <button type="button" className="hover:text-primary cursor-pointer">
           Login
          </button>
-         <button type="button" className="px-7 py-2 bg-primary rounded-full text-white hover:bg-primary hover:opacity-90 transition-opacity duration-300 ease-in-out cursor-pointer">
+         <Button type="button">
           Sign Up
-         </button>
+         </Button>
       </div>
 
       </div>
@@ -86,10 +87,10 @@ export default function NavBar() {
               </a>
 
               <div className="flex space-x-4 font-bold pt-2 pl-10">
-                <button className="hover:text-primary">Login</button>
-                <button className="px-7 py-2 bg-primary rounded-full text-white hover:opacity-90 transition">
+                <button className="hover:text-primary cursor-pointer">Login</button>
+                <Button type="button">
                   Sign Up
-                </button>
+                </Button>
               </div>
             </motion.div>
           </motion.div>

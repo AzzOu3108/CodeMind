@@ -1,6 +1,7 @@
 import React from 'react'
 import BlurBackground from './ui/BlurBackground'
 import { ArrowDown, Check } from 'lucide-react'
+import Button from './ui/Button';
 
 const features = [
   "Personalized Roadmap",
@@ -26,12 +27,13 @@ export default function Hero() {
         <br />
         with the power of AI.
       </p>
-      <button 
+      <Button
       type="button"
-      aria-label="Get started for free"
-      className='px-7 py-4 2xl:px-8 2xl:py-5 2xl:text-xl shadow-xl bg-primary font-bold rounded-full text-white hover:bg-primary hover:opacity-90 transition-opacity duration-300 ease-in-out cursor-pointer'>
+      aria-label="Get started free"
+      size='lg'
+      className='shadow-xl font-bold'>
         Get Started Free
-      </button>
+      </Button>
       {/* // TODO: Fix the size of the md screens 
        */}
 
