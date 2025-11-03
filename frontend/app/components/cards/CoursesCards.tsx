@@ -22,7 +22,7 @@ const courses = [
 export default function CoursesCards() {
   return (
     <div className="mt-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {courses.map((course, index) => {
           const isLast = index === courses.length - 1
           const isOdd = courses.length % 2 !== 0

@@ -11,7 +11,7 @@ interface CardsProps {
 
 export default function Cards({title, description, icon, className, iconBackground = true, chart}:CardsProps) {
   return (
-     <div className={`flex flex-col text-center bg-white p-6 rounded-3xl gap-3 items-center shadow-2xl max-w-6xl mx-auto ${className}`}>
+     <div className={`relative flex flex-col text-center bg-white p-6 rounded-3xl gap-3 items-center shadow-2xl max-w-6xl mx-auto ${className}`}>
         <div className={
             iconBackground ?
             'px-2 py-2 bg-primary rounded-full text-white'

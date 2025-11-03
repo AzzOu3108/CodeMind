@@ -1,6 +1,6 @@
 import React from 'react'
 import Cards from './Cards'
-import {LineChart, Line, ResponsiveContainer, Tooltip, Area, AreaChart} from "recharts";
+import {ResponsiveContainer, Tooltip, Area, AreaChart} from "recharts";
 
 const data = [
   { value: 100 },

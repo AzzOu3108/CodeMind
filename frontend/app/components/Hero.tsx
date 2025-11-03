@@ -2,6 +2,7 @@ import React from 'react'
 import BlurBackground from './ui/BlurBackground'
 import { ArrowDown, Check } from 'lucide-react'
 import Button from './ui/Button';
+import Link from 'next/link';
 
 const features = [
   "Personalized Roadmap",
@@ -18,8 +19,8 @@ export default function Hero() {
       <BlurBackground />
       </div>
 
-      <div className='text-center mt-20 md:mt-20 lg:mt-32 2xl:mt-48'>
-      <h1 className='text-3xl  md:text-3xl lg:text-4xl 2xl:text-5xl font-bold pb-10'>
+      <div className='text-center z-10 mt-20 md:mt-20 lg:mt-32 2xl:mt-48'>
+      <h1 className='text-3xl md:text-3xl lg:text-4xl 2xl:text-5xl font-bold pb-10'>
         Learn Programming & Algorithms Smarter with AI
       </h1>
       <p className='pb-10 xl:text-xl'>
@@ -32,7 +33,9 @@ export default function Hero() {
       aria-label="Get started free"
       size='lg'
       className='shadow-xl font-bold'>
-        Get Started Free
+       <Link href="/auth/signup">
+       Get Started Free
+       </Link>
       </Button>
       {/* // TODO: Fix the size of the md screens 
        */}

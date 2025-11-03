@@ -2,6 +2,7 @@ import React from 'react'
 import BlurBackground from './ui/BlurBackground'
 import AboutChartCard from './cards/AboutChartCard'
 import Button from './ui/Button'
+import Link from 'next/link'
 
 export default function About() {
   return (
@@ -13,7 +14,7 @@ export default function About() {
         <BlurBackground width={902} height={400}/>
       </div>
 
-     <div className='mt-28 grid grid-cols-1 space-y-6 md:grid-cols-2 md:space-y-0 md:gap-24 '>
+     <div className='relative z-10 mt-28 grid grid-cols-1 space-y-6 md:grid-cols-2 md:space-y-0 md:gap-24 '>
       <div className='text-center space-y-6 md:text-left md:order-2 '>
         <h1 className='text-3xl font-bold'>
           About <br />
@@ -39,7 +40,9 @@ export default function About() {
       aria-label="Join Us Now"
       size='md'
       className='shadow-xl font-bold'>
+        <Link href="/auth/signup">
         Join Us Now
+        </Link>
       </Button>
       </div>
     </section>
