@@ -10,7 +10,7 @@ export default function AuthCard({
 }
 ) {
   return (
-    <div className="flex flex-col items-center justify-start bg-white backdrop-blur-md shadow-lg py-5 px-18 rounded-2xl w-[500px] min-h-[500px]">
+    <div className="flex flex-col items-center justify-start bg-white backdrop-blur-md shadow-lg py-5 px-18 rounded-2xl w-[500px] min-h-[560px]">
         <div className="flex flex-col items-center mt-2 mb-6">
             <div className="text-[35px] 2xl:text-[45px]">
                 <HeadCircuitIcon />

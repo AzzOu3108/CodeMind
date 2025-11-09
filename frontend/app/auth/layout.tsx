@@ -8,7 +8,7 @@ interface AuthlayoutProps {
 const AuthLayout = ({children}: AuthlayoutProps) =>{
     return(
         <section className='relative w-full h-screen flex justify-center items-center overflow-hidden'>
-            <BlurBackground />
+            <BlurBackground className='translate-y-28'/>
             {children}
         </section>
     )
