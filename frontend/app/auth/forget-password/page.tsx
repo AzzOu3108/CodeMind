@@ -8,6 +8,7 @@ export default function page() {
       <PasswordCard
        title='Forgot password?'
        text= {`No worries, we'll send you rest instructions.`}
+       variant='default'
        >
         <ForgetPassForm/>
       </PasswordCard>

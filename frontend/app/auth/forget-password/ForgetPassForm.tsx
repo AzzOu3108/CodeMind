@@ -1,3 +1,4 @@
+"use client"
 import AuthInputs from '@/app/components/ui/AuthInputs'
 import Link from 'next/link'
 import React, { useState } from 'react'
@@ -32,11 +33,13 @@ export default function ForgetPassForm() {
   }
   
   return (
-    <form className='flex flex-col space-y-6'>
+    <form onSubmit={handleSubmit} className='flex flex-col space-y-6'>
         <AuthInputs 
         label='Email'
         id='email'
         name='email'
+        value={formData.email}
+        onChange={handleChange}
         placeholder="JhonDoe@gmail.com"
         required
         />

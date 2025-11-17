@@ -4,11 +4,11 @@ import AuthInputs from '@/app/components/ui/AuthInputs'
 import { Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
+import { toast } from 'sonner'
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({ email: "", password: "", rememberMe: false })
-  const [message, setMessage] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+
   const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,8 +18,6 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setMessage(null)
-    setError(null)
     try {
       const response = await fetch("", { // TODO: login endpoint
         method: "POST",
@@ -28,20 +26,17 @@ export default function LoginForm() {
       })
       if (!response.ok) {
         const errorData = await response.json()
-        setError(errorData.message || "Login failed. Please try again.")
+        toast.error(errorData.message || "Login failed. Please try again.")
       } else {
-        setMessage("Login successful!")
+        toast.success("Login successful!")
       }
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      toast.error("An error occurred. Please try again.")
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col translate-y-7 gap-4 w-full max-w-md">
-      {message && <div className="text-green-600 font-medium">{message}</div>}
-      {error && <div className="text-red-600 font-medium">{error}</div>}
-
       <AuthInputs
         label="Email"
         id="email"

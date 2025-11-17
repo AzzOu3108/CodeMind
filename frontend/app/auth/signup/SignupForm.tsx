@@ -5,6 +5,7 @@ import Link from "next/link"
 import React, { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import AuthInputs from "@/app/components/ui/AuthInputs"
+import { toast } from "sonner"
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -13,8 +14,7 @@ export default function SignupForm() {
     password: "",
     rememberMe: false,
   })
-  const [message, setMessage] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+
   const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,31 +27,32 @@ export default function SignupForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setMessage(null)
-    setError(null)
     try {
-      const response = await fetch("", { // TODO: endpoint here
+      const response = await fetch("", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       })
+
       if (!response.ok) {
         const errorData = await response.json()
-        setError(errorData.message || "Signup failed. Please try again.")
+        toast.error(errorData.message || "Signup failed. Please try again.")
       } else {
-        setMessage("Signup successful!")
-        setFormData({ fullName: "", email: "", password: "", rememberMe: false })
+        toast.success("Signup successful!")
+        setFormData({
+          fullName: "",
+          email: "",
+          password: "",
+          rememberMe: false,
+        })
       }
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      toast.error("An unexpected error occurred. Please try again.")
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md">
-      {message && <div className="text-green-600 font-medium">{message}</div>}
-      {error && <div className="text-red-600 font-medium">{error}</div>}
-
       <AuthInputs
         label="Full name"
         id="fullName"
