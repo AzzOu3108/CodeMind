@@ -6,7 +6,7 @@ import { AuthModule } from './module/auth/auth.module';
 import databaseConfig from './config/database.config';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CourseModule } from './course/course.module';
+import { CourseModule } from './module/course/course.module';
 
 @Module({
   imports: [
