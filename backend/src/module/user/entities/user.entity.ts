@@ -6,19 +6,28 @@ export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({type: 'char', length:50})
-    name: string;
+    @Column({ type: 'varchar', length: 100 })
+    fullname: string;
 
-    @Column({type: 'varchar', length: 10})
-    password: string;
-
-    @Column({type: 'varchar', length:50, unique: true})
+    @Column({ type: 'varchar', length: 255, unique: true })
     email: string;
 
-    @CreateDateColumn({type: 'timestamp', name: 'created_at'})
+    @Column({ type: 'varchar', length: 255, select:false })
+    password: string;
+
+    @CreateDateColumn({
+        name: 'created_at',
+        type: 'timestamptz',
+        default: () => 'now()',
+    })
     created_at: Date;
 
-    @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
+    @UpdateDateColumn({
+        name: 'updated_at',
+        type: 'timestamptz',
+        default: () => 'now()',
+        onUpdate: 'CURRENT_TIMESTAMP',
+    })
     updated_at: Date;
 
     @OneToMany(() => Course, (course) => course.user)

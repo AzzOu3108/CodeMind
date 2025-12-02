@@ -4,7 +4,7 @@ import { IsEmail, IsOptional, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
     @IsOptional()
-    name?: string;
+    fullname?: string;
 
     @IsOptional()
     @IsEmail()
