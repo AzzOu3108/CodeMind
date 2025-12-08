@@ -1,20 +1,19 @@
 import { CourseChapiter } from "src/module/course_chapiter/entities/course_chapiter.entity";
-import { User } from "src/module/user/entities/user.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
-@Entity('course')
-export class Course {
+@Entity('chapiter')
+export class Chapiter {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column({type: 'varchar', length: 255})
     title: string;
 
-    @Column({type: 'varchar', length:255})
-    description: string;
+    @Column({type: 'json'})
+    content: string;
 
-    @Column({type: 'int', width: 3})
-    progress: number;
+    @Column({type:'boolean'})
+    is_completed: string;
 
     @CreateDateColumn({
         name: 'created_at',
@@ -31,10 +30,6 @@ export class Course {
     })
     updated_at: Date;
 
-    @ManyToOne(() => User, (user) => user.courses)
-    @JoinColumn({ name: 'user_id' })
-    user: User;
-
-    @OneToMany(()=> CourseChapiter, (cc)=>cc.course)
+    @OneToMany (()=> CourseChapiter, (cc)=> cc.chapiter)
     courseChapiter: CourseChapiter[];
 }
