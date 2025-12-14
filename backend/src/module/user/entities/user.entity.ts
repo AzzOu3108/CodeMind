@@ -1,4 +1,5 @@
 import { Course } from "src/module/course/entities/course.entity";
+import { Progress } from "src/module/progress/entities/progress.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('user')
@@ -17,19 +18,24 @@ export class User {
 
     @CreateDateColumn({
         name: 'created_at',
-        type: 'timestamptz',
+        type: 'timestamp',
         default: () => 'now()',
     })
     created_at: Date;
 
     @UpdateDateColumn({
         name: 'updated_at',
-        type: 'timestamptz',
+        type: 'timestamp',
         default: () => 'now()',
         onUpdate: 'CURRENT_TIMESTAMP',
     })
     updated_at: Date;
 
+    
     @OneToMany(() => Course, (course) => course.user)
     courses: Course[];
+
+    @OneToMany(()=> Progress, (p)=>p.user)
+    progress: Progress[];
+    
 }

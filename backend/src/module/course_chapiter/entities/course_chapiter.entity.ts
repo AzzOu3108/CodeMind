@@ -1,19 +1,22 @@
+
 import { Chapiter } from "src/module/chapter/entities/chapiter.entity";
 import { Course } from "src/module/course/entities/course.entity";
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
 @Entity('course_chapiter')
 export class CourseChapiter {
     @PrimaryColumn()
-    courseId: number;
+    course_id: number;
 
     @PrimaryColumn()
-    chapiterId: number;
+    chapiter_id: number;
 
-    @ManyToOne(() => Course, (course) => course.courseChapiter)
+    @ManyToOne(() => Course, (course) => course.courseChapiter, {onDelete: 'CASCADE'})
+    @JoinColumn({ name: 'course_id' })
     course: Course;
 
-    @ManyToOne(() => Chapiter, (chapiter) => chapiter.courseChapiter)
+    @ManyToOne(() => Chapiter, (chapiter) => chapiter.courseChapiter, {onDelete: 'CASCADE'})
+    @JoinColumn({ name: 'chapiter_id' })
     chapiter: Chapiter;
 
     @Column({ type: 'int' })

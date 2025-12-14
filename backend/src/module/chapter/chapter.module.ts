@@ -6,4 +6,4 @@ import { ChapterController } from './chapter.controller';
   controllers: [ChapterController],
   providers: [ChapterService],
 })
-export class ChapterModule {}
+export class ChapiterModule {}

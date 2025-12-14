@@ -7,8 +7,10 @@ import databaseConfig from './config/database.config';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CourseModule } from './module/course/course.module';
-import { ChapterModule } from './module/chapter/chapter.module';
+
 import { CourseChapiterModule } from './module/course_chapiter/course_chapiter.module';
+import { ProgressModule } from './module/progress/progress.module';
+import { ChapiterModule } from './module/chapter/chapter.module';
 
 @Module({
   imports: [
@@ -34,7 +36,7 @@ import { CourseChapiterModule } from './module/course_chapiter/course_chapiter.m
       },
       inject: [ConfigService],
     }),
-    UserModule, AuthModule, CourseModule, ChapterModule, CourseChapiterModule],
+    UserModule, AuthModule, CourseModule, ChapiterModule, CourseChapiterModule, ProgressModule],
   controllers: [AppController],
   providers: [AppService],
 })

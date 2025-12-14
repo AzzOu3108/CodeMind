@@ -13,24 +13,37 @@ export class Course {
     @Column({type: 'varchar', length:255})
     description: string;
 
-    @Column({type: 'int', width: 3})
+    @Column({type: 'int', default: 0})
     progress: number;
+
+    @Column({type: 'int'})
+    chapiter_count: number;
+
+    @Column({type: 'boolean', default: false})
+    include_video: boolean;
+
+    @Column({
+        type: 'enum',
+        enum: ['beginner', 'intermediate', 'advanced' ]
+    })
+    difficulty: 'beginner'| 'intermediate'| 'advanced';
 
     @CreateDateColumn({
         name: 'created_at',
-        type: 'timestamptz',
+        type: 'timestamp',
         default: () => 'now()',
     })
     created_at: Date;
 
     @UpdateDateColumn({
         name: 'updated_at',
-        type: 'timestamptz',
+        type: 'timestamp',
         default: () => 'now()',
         onUpdate: 'CURRENT_TIMESTAMP',
     })
     updated_at: Date;
 
+    //Relationships
     @ManyToOne(() => User, (user) => user.courses)
     @JoinColumn({ name: 'user_id' })
     user: User;
