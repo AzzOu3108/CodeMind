@@ -1,6 +1,8 @@
+import { ChapiterResource } from "src/module/chapiter_resources/entities/chapiter_resource.entity";
 import { CourseChapiter } from "src/module/course_chapiter/entities/course_chapiter.entity";
 import { Progress } from "src/module/progress/entities/progress.entity";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Resources } from "src/module/resources/entities/resources.entity";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm";
 
 @Entity('chapiter')
 export class Chapiter {
@@ -12,9 +14,6 @@ export class Chapiter {
 
     @Column({type: 'json'})
     content: string;
-
-    @Column({type:'boolean'})
-    is_completed: boolean;
 
     @CreateDateColumn({
         name: 'created_at',
@@ -36,4 +35,15 @@ export class Chapiter {
 
     @OneToMany(()=> Progress, (p)=>p.chapiter)
     progress: Progress[];
-}
+
+    @OneToMany(() => ChapiterResource, (cr) => cr.chapiter)
+    chapiterResources: ChapiterResource[];
+
+    @ManyToMany(() => Resources, (r) => r.chapiters)
+    @JoinTable({
+        name: 'chapiter_resources',
+        joinColumn: { name: 'chapiter_id', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'resource_id', referencedColumnName: 'id' },
+    })
+    resources: Resources[];
+} 

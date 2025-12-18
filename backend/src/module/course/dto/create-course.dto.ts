@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsString, MaxLength, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength, IsInt, IsBoolean, IsEnum } from 'class-validator';
+
+export enum Difficulty {
+  Beginner = 'beginner',
+  Intermediate = 'intermediate',
+  Advanced = 'advanced',
+}
 
 export class CreateCourseDto {
   @IsInt()
@@ -14,4 +20,15 @@ export class CreateCourseDto {
   @IsString()
   @MaxLength(255)
   description: string;
+
+  @IsNotEmpty()
+  @IsInt()
+  chapiter_count: number;
+
+  @IsBoolean()
+  include_video: boolean;
+
+  @IsEnum(Difficulty)
+  difficulty: Difficulty;
+
 }

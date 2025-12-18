@@ -44,7 +44,8 @@ export class Course {
     updated_at: Date;
 
     //Relationships
-    @ManyToOne(() => User, (user) => user.courses)
+
+    @ManyToOne(() => User, (user) => user.courses )
     @JoinColumn({ name: 'user_id' })
     user: User;
 
