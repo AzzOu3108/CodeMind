@@ -1,8 +1,9 @@
 
 import { Chapiter } from "src/module/chapter/entities/chapiter.entity";
 import { Course } from "src/module/course/entities/course.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
+@Index(['course', 'chapiter'], {unique:true})
 @Entity('course_chapiter')
 export class CourseChapiter {
     @PrimaryColumn()

@@ -8,9 +8,12 @@ import { ChapterService } from './chapter.service';
 export class ChapterController {
   constructor(private readonly chapterService: ChapterService) {}
 
-  @Post()
-  create(@Body() createChapterDto: CreateChapterDto) {
-    return this.chapterService.create(createChapterDto);
+  @Post(':courseId')
+  create(
+    @Param('courseId') courseId: number,
+    @Body() createChapterDtos: CreateChapterDto[]
+  ) {
+    return this.chapterService.create(courseId ,createChapterDtos);
   }
 
   @Get()
@@ -21,11 +24,6 @@ export class ChapterController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.chapterService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChapterDto: UpdateChapterDto) {
-    return this.chapterService.update(+id, updateChapterDto);
   }
 
   @Delete(':id')

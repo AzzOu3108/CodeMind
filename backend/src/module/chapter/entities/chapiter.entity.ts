@@ -12,7 +12,7 @@ export class Chapiter {
     @Column({type: 'varchar', length: 255})
     title: string;
 
-    @Column({type: 'json'})
+    @Column({type: 'varchar'})
     content: string;
 
     @CreateDateColumn({

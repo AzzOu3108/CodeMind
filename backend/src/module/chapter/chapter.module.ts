@@ -4,9 +4,11 @@ import { ChapterController } from './chapter.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Chapiter } from './entities/chapiter.entity';
 import { ChapiterResourcesModule } from 'src/module/chapiter_resources/chapiter_resources.module';
+import { CourseModule } from '../course/course.module';
+import { CourseChapiter } from '../course_chapiter/entities/course_chapiter.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Chapiter]), ChapiterResourcesModule],
+  imports:[TypeOrmModule.forFeature([Chapiter, CourseChapiter]),CourseModule , ChapiterResourcesModule],
   controllers: [ChapterController],
   providers: [ChapterService],
   exports: [ChapterService]

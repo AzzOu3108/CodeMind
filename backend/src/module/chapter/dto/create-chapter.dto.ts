@@ -1,9 +1,6 @@
 import { IsBoolean, IsInt, IsNotEmpty, IsString, MaxLength } from "class-validator";
 
 export class CreateChapterDto {
-    @IsInt()
-    @IsNotEmpty()
-    id: number;
 
     @IsNotEmpty()
     @IsString()
@@ -13,9 +10,5 @@ export class CreateChapterDto {
     @IsNotEmpty()
     @IsString()
     @MaxLength(255)
-    content: JSON
-
-    @IsNotEmpty()
-    @IsBoolean()
-    is_completed: boolean
+    content: string
 }

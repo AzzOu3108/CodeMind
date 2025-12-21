@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Course } from './entities/course.entity';
 import { User } from 'src/module/user/entities/user.entity';
@@ -29,13 +28,28 @@ export class CourseService {
 
   async findAll() {
     return this.courseRepo.find({
-      order: {created_at: 'DESC'}
+      order: {created_at: 'DESC'},
+      relations:{
+        courseChapiter:{
+          chapiter: true
+        }
+      }
     })
   }
 
   async findOne(id: number) {
     const course = await this.courseRepo.findOne({
-      where: {id}
+      where: {id},
+      relations: {
+        courseChapiter:{
+          chapiter: true,
+        }
+      },
+      order:{
+        courseChapiter:{
+          order: 'ASC'
+        }
+      }
     })
 
     if(!course){
@@ -44,9 +58,15 @@ export class CourseService {
     return course
   }
 
-  async remove(id: number) {
-    const course = await this.findOne(id)
+  async remove(courseId: number): Promise<void> {
+    const course = await this.courseRepo.findOne({
+      where: {id: courseId},
+      relations:{ courseChapiter: {chapiter: true}},
+    })
+
+    if(!course){
+      throw new NotFoundException('Course not found');
+    }
     await this.courseRepo.remove(course)
-    return {message: 'Course deleted'}
   }
 }
