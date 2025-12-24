@@ -21,13 +21,4 @@ export class ChapterController {
     return this.chapterService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.chapterService.findOne(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.chapterService.remove(+id);
-  }
 }

@@ -84,11 +84,4 @@ export class ChapterService {
     });
   }
 
-  async findOne(id: number) {
-    return `This action returns a #${id} chapter`;
-  }
-
-  async remove(id: number) {
-    
-  }
 }

@@ -1,22 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginDto } from './dto/login-dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcryptjs'
 
 @Injectable()
 export class AuthService {
+  constructor(
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+    private jwtService: JwtService,
+  ){}
 
-  login(loginDto: LoginDto) {
-    return {message: 'Login successful', token :'your jwt token here'}
-  }
+  async login(dto: LoginDto) {
+    const user = await this.userRepo.findOne({
+      where: {email: dto.email}
+    })
+    if(!user){
+      throw new UnauthorizedException('Invalid credentials')
+    }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+    const isMatch = await bcrypt.compare(dto.password, user.password)
+    if(!isMatch){
+      throw new UnauthorizedException('Invalid credentials')
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    const payload = {sub: user.id}
+    return {
+      access_token: this.jwtService.sign(payload)
+    }
   }
 }

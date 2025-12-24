@@ -11,20 +11,4 @@ export class AuthController {
   login(@Body() loginDto: LoginDto){
     return this.authService.login(loginDto)
   }
-
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
 }
