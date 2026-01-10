@@ -57,6 +57,15 @@ export class UserService {
   return this.userRepo.findOne({ where: { id } });
   }
 
+  async findByEmail(email: string) {
+    const normalized = email.toLowerCase();
+    return this.userRepo
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email: normalized })
+      .getOne();
+  }
+
   async findOne(id: number){
   const user = await this.userRepo.findOne({ where: { id } });
 

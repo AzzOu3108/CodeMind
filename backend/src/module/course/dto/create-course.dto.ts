@@ -7,10 +7,6 @@ export enum Difficulty {
 }
 
 export class CreateCourseDto {
-  @IsInt()
-  @IsNotEmpty()
-  user_id: number;
-  
   @IsNotEmpty()
   @IsString()
   @MaxLength(255)
