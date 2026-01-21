@@ -7,7 +7,6 @@ import { RefreshToken } from './entities/refresh.entity';
 import { UserModule } from 'src/module/user/user.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
-import { JwtRefreshStrategy } from './jwt.refresh.strategy';
 
 @Module({
   imports:[
@@ -20,6 +19,6 @@ import { JwtRefreshStrategy } from './jwt.refresh.strategy';
     UserModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

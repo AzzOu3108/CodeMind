@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Course } from './entities/course.entity';
 import { User } from 'src/module/user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { title } from 'process';
+import { Chapiter } from 'src/module/chapter/entities/chapiter.entity';
 
 @Injectable()
 export class CourseService {
@@ -12,7 +12,9 @@ export class CourseService {
   @InjectRepository(Course)
   private readonly courseRepo: Repository<Course>,
   @InjectRepository(User)
-  private userRepo: Repository<User>
+  private userRepo: Repository<User>,
+  @InjectRepository(Chapiter)
+  private chapiterRepo: Repository<Chapiter>
  ){}
 
   async create(dto: CreateCourseDto, userId: number) {
@@ -97,6 +99,12 @@ export class CourseService {
     if(!course){
       throw new NotFoundException('Course not found');
     }
+
+    if(course.courseChapiter && course.courseChapiter.length > 0){
+      const chapiterIds = course.courseChapiter.map(cc => cc.chapiter.id);
+      await this.chapiterRepo.delete(chapiterIds);
+    }
+
     await this.courseRepo.remove(course)
   }
 }

@@ -15,7 +15,7 @@ export default function BlurBackground({
   const heightValue = typeof height ==='number' ? `${height}px` : height
 
   return (
-    <div className="absolute -top-30 inset-0 z-0 flex justify-center">
+    <div className="absolute -top-30 inset-0 -z-30 flex justify-center">
       <div
         className={`rounded-full blur-[120px] opacity-80 
          bg-radial from-[rgba(155,93,229,0.4)] via-[rgba(201,168,241,0.5)] to-[rgba(255,255,255,1)] ${className}`}

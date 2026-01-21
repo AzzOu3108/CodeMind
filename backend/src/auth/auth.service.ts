@@ -22,6 +22,8 @@ export class AuthService {
    if (!user) {
      throw new NotFoundException('User not found');
    }
+
+   await this.refreshTokenRepo.delete({user: {id: userId}})
    
    const accessToken = this.jwtService.sign(
       { sub: userId, email: user.email ?? '' },
@@ -35,13 +37,13 @@ export class AuthService {
 
    const hashedToken = await bcrypt.hash(refreshToken, 10);
 
-   const newRefresh = this.refreshTokenRepo.create({
-     user,
-     token_hash: hashedToken,
-     expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-   });
-
-   await this.refreshTokenRepo.save(newRefresh);
+   await this.refreshTokenRepo.save(
+    this.refreshTokenRepo.create({
+      user,
+      token_hash: hashedToken,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    })
+  );
 
    return { accessToken, refreshToken };
  }
@@ -63,19 +65,25 @@ export class AuthService {
    return userWithoutPassword;
  }
 
- async refresh(userId: number, token: string){
-   const savedToken = await this.refreshTokenRepo.findOne({
-      where: { user: {id:userId} },
-   });
+ async refresh(refreshToken: string) {
+  if (!refreshToken) throw new ForbiddenException('No refresh token');
 
-   if (!savedToken) throw new ForbiddenException('No refresh token found');
-   
-   const isValid = await bcrypt.compare(token, savedToken.token_hash);
+  const payload = this.jwtService.verify(refreshToken, {
+    secret: process.env.JWT_REFRESH_SECRET,
+  });
 
-   if (!isValid) throw new ForbiddenException('Invalid refresh token found');
-   
-   return this.login(userId);
- }
+  const saved = await this.refreshTokenRepo.findOne({
+    where: { user: { id: payload.sub } },
+  });
+
+  if (!saved) throw new ForbiddenException();
+
+  const isValid = await bcrypt.compare(refreshToken, saved.token_hash);
+  if (!isValid) throw new ForbiddenException();
+
+  return this.login(payload.sub);
+}
+
 
  async logout(userId: number){
    await this.refreshTokenRepo.delete({user: {id:userId}})

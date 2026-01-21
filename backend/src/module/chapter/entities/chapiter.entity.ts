@@ -30,7 +30,7 @@ export class Chapiter {
     })
     updated_at: Date;
 
-    @OneToMany (()=> CourseChapiter, (cc)=> cc.chapiter)
+    @OneToMany(() => CourseChapiter, (cc) => cc.chapiter, {onDelete: 'CASCADE'})
     courseChapiter: CourseChapiter[];
 
     @OneToMany(()=> Progress, (p)=>p.chapiter)

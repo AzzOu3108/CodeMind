@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Req } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -10,4 +10,9 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get('cookies')
+  getCookies(@Req() request) {
+    console.log(request.cookies); 
+    const token = request.cookies['token'];
+  }
 }

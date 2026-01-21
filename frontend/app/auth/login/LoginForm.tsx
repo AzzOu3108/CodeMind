@@ -1,35 +1,47 @@
 "use client"
 
-import AuthInputs from '@/app/components/ui/AuthInputs'
-import { Eye, EyeOff } from 'lucide-react'
-import Link from 'next/link'
-import React, { useState } from 'react'
-import { toast } from 'sonner'
+import AuthInputs from "@/app/components/ui/AuthInputs"
+import { Eye, EyeOff } from "lucide-react"
+import Link from "next/link"
+import React, { useState } from "react"
+import { toast } from "sonner"
 
 export default function LoginForm() {
-  const [formData, setFormData] = useState({ email: "", password: "", rememberMe: false })
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  })
 
   const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, type, checked, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: type === "checkbox" ? checked : value }))
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     try {
-      const response = await fetch("", { // TODO: login endpoint
+      const response = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       })
+
       if (!response.ok) {
         const errorData = await response.json()
         toast.error(errorData.message || "Login failed. Please try again.")
-      } else {
-        toast.success("Login successful!")
+        return
       }
+ 
+      const data = await response.json()
+      console.log("LOGIN RESPONSE:", data)
+
+      toast.success("Login successful!")
     } catch (err) {
       toast.error("An error occurred. Please try again.")
     }
@@ -58,6 +70,7 @@ export default function LoginForm() {
           placeholder="password123"
           required
         />
+
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
@@ -72,19 +85,6 @@ export default function LoginForm() {
         <Link href="/auth/forget-password" className="text-sm font-medium text-gray-500 select-none">
           Forget your password?
         </Link>
-        <div className="flex items-center space-x-2">
-          <label htmlFor="rememberMe" className="font-medium text-gray-500 text-sm select-none cursor-pointer">
-            Remember me
-          </label>
-          <input
-            type="checkbox"
-            id="rememberMe"
-            name="rememberMe"
-            checked={formData.rememberMe}
-            onChange={handleChange}
-            className="w-4 h-4 accent-primary cursor-pointer"
-          />
-        </div>
       </div>
 
       <button

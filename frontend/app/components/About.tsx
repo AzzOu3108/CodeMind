@@ -3,6 +3,7 @@ import BlurBackground from './ui/BlurBackground'
 import AboutChartCard from './cards/AboutChartCard'
 import Button from './ui/Button'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function About() {
   return (
@@ -13,9 +14,9 @@ export default function About() {
       <div className='pointer-events-none'>
         <BlurBackground width={902} height={400}/>
       </div>
-
+      
      <div className='relative z-10 mt-28 grid grid-cols-1 space-y-6 md:grid-cols-2 md:space-y-0 md:gap-24 '>
-      <div className='text-center space-y-6 md:text-left md:order-2 '>
+      <div className='text-center space-y-6 md:mt-4 md:text-left md:order-2 '>
         <h1 className='text-3xl font-bold'>
           About <br />
           Code

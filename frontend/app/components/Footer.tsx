@@ -1,11 +1,13 @@
 import { HeadCircuitIcon } from '@phosphor-icons/react'
+import { Github, Instagram, Linkedin } from 'lucide-react'
+import Link from 'next/link'
 import React from 'react'
 
 export default function Footer() {
   return (
     <section
     id='footer'
-    className='relative h-1/2 w-screen bg-[#c9a8f195] -mx-5 sm:-mx-20 lg:-mx-32'
+    className='relative h-1/2 w-screen bg-[#c9a8f110] -mx-5 sm:-mx-20 lg:-mx-32'
     >
       <div className='pt-7 px-12'>
         
@@ -21,7 +23,7 @@ export default function Footer() {
           Code<span className="text-primary">Mind</span>
         </h1>
       </div>
-      <p className='py-4 text-center md:text-left'>
+      <p className='py-4 text-center text-sm text-muted-foreground md:text-left'>
         AI-powered programming courses for everyone.
       </p>
        </div>
@@ -33,16 +35,24 @@ export default function Footer() {
         <p className="font-semibold">Quick Links</p>
         <ul className="text-left inline-block list-disc pl-5">
          <li>
-          <a href="#hero">Home</a>
+          <a href="#hero"
+          className='text-sm text-muted-foreground hover:text-foreground transition-all duration-300 hover:translate-x-1 inline-block'
+          >Home</a>
           </li>
          <li>
-          <a href="#features">Features</a>
+          <a href="#features"
+          className='text-sm text-muted-foreground hover:text-foreground transition-all duration-300 hover:translate-x-1 inline-block'
+          >Features</a>
          </li>
          <li>
-          <a href="#courses">Courses</a>
+          <a href="#courses"
+          className='text-sm text-muted-foreground hover:text-foreground transition-all duration-300 hover:translate-x-1 inline-block'
+          >Courses</a>
          </li>
          <li>
-          <a href="#about">About</a>
+          <a href="#about"
+          className='text-sm text-muted-foreground hover:text-foreground transition-all duration-300 hover:translate-x-1 inline-block'
+          >About</a>
          </li>
         </ul>
       </div>
@@ -50,38 +60,55 @@ export default function Footer() {
       <div className='text-left pl-9'> 
        <p className='font-semibold'>Legal</p>
        <ul className='text-left inline-block list-disc pl-6'>
-        <li className=''>Privacy Policy</li>
-        <li className=''>Terms of Service</li>
+        <li>
+          <a href='#privacy_policy'
+          className='text-sm text-muted-foreground hover:text-foreground transition-all duration-300 hover:translate-x-1 inline-block'
+          >
+            Privacy Policy
+          </a>
+        </li>
+        <li>
+        <a href="#terms_of_service"
+        className='text-sm text-muted-foreground hover:text-foreground transition-all duration-300 hover:translate-x-1 inline-block'
+        >
+          Terms of Service
+        </a>
+        </li>
        </ul>
        </div>
       
 
-      <div className='flex flex-col items-center justify-center col-span-2 lg:col-auto'>
+      <div className='flex flex-col items-center  col-span-2 lg:col-auto'>
         <p className='font-semibold'>Follow Us</p>
-        <ul className='flex justify-center space-x-5 '>
-          <li>
-            <a href="https://www.linkedin.com/">
-              <img src="/assets/linkedin-color-svgrepo-com.svg" alt="linkedin" className="w-5 h-5"/>
-            </a>
-          </li>
-          <li>
-            <a href="https://github.com/">
-              <img src="/assets/github-142-svgrepo-com.svg" alt="github" className="w-5 h-5"/>
-            </a>
-          </li>
-          <li>
-            <a href="https://www.instagram.com/">
-              <img src="/assets/instagram-1-svgrepo-com.svg" alt="instagram" className="w-5 h-5"/>
-            </a>
-          </li>
-        </ul>
+        <div className='mt-4 flex gap-4'>
+          <Link href="#"
+           className="text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110"
+          >
+          <Linkedin className='h-5 w-5' />
+          <span className="sr-only">LinkedIn</span>
+          </Link>
+          <Link
+          href="#"
+          className="text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110"
+          >
+          <Github className="h-5 w-5" />
+          <span className="sr-only">GitHub</span>
+          </Link>
+          <Link
+          href="#"
+          className="text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110"
+          >
+            <Instagram className='h-5 w-5'/>
+            <span className="sr-only">Instagram</span>
+          </Link>
+        </div>
       </div>
       </div>
       </div>
       </div>
 
-      <div className="w-full h-[1px] bg-black my-4"></div>
-      <p className='pb-4 text-center'>Copyright © 2025 CodeMind. All the right reserved </p>
+      <div className="w-full h-[0.5px] bg-black my-4"></div>
+      <p className='pb-4 text-center text-sm text-muted-foreground'>Copyright © 2025 CodeMind. All the right reserved </p>
       </div>
 
     </section>

@@ -31,7 +31,6 @@ const features = [
 ]
 
 
-
 export default function FeatureCards() {
     return(
         <div className='md:flex md:justify-end md:absolute md:top-10'>
@@ -42,7 +41,7 @@ export default function FeatureCards() {
                     title={feature.title}
                     description={feature.description}
                     icon={feature.icon}
-                    className={index% 2 === 1 ? "md:translate-y-6" : ""}
+                    className={index % 2 === 1 ? "md:translate-y-4" : ""}
                     iconBackground = {true}
                 />
             ))}

@@ -8,6 +8,8 @@ import About from "./components/About";
 import Footer from "./components/Footer";
 import Hero from "./components/Hero";
 import { useEffect } from "react";
+import Techstack from "./components/Techstack";
+import TechStack from "./components/Techstack";
 
 export default function Home() {
 
@@ -24,6 +26,7 @@ export default function Home() {
       <Hero />
       <Features />
       <Courses />
+      <TechStack />
       <About />
       </main>
       <Footer />

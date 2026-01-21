@@ -49,6 +49,6 @@ export class Course {
     @JoinColumn({ name: 'user_id' })
     user: User;
 
-    @OneToMany(()=> CourseChapiter, (cc)=>cc.course)
+    @OneToMany(()=> CourseChapiter, (cc)=>cc.course, {onDelete: 'CASCADE'})
     courseChapiter: CourseChapiter[];
 }
