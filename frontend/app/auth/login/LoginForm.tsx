@@ -1,6 +1,7 @@
 "use client"
 
 import AuthInputs from "@/app/components/ui/AuthInputs"
+import { apiFetch } from "@/lib/api"
 import { Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 import React, { useState } from "react"
@@ -23,27 +24,18 @@ export default function LoginForm() {
     e.preventDefault()
 
     try {
-      const response = await fetch("http://localhost:8000/auth/login", {
+      const data = await apiFetch("/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
         }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.message || "Login failed. Please try again.")
-        return
-      }
- 
-      const data = await response.json()
       console.log("LOGIN RESPONSE:", data)
-
       toast.success("Login successful!")
-    } catch (err) {
-      toast.error("An error occurred. Please try again.")
+    } catch (err:any) {
+      toast.error( err.message ||"An error occurred. Please try again.")
     }
   }
 
