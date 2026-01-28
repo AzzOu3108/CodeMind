@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
 
 @theme {
   --color-primary: #9B5DE5;

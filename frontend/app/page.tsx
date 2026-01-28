@@ -10,6 +10,7 @@ import Hero from "./components/Hero";
 import { useEffect } from "react";
 import Techstack from "./components/Techstack";
 import TechStack from "./components/Techstack";
+import DashboardContent from "./dashboard/components/DashboardContent";
 
 export default function Home() {
 

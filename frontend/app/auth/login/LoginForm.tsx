@@ -32,7 +32,6 @@ export default function LoginForm() {
         }),
       })
 
-      console.log("LOGIN RESPONSE:", data)
       toast.success("Login successful!")
     } catch (err:any) {
       toast.error( err.message ||"An error occurred. Please try again.")

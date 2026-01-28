@@ -6,50 +6,52 @@ import React, { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import AuthInputs from "@/app/components/ui/AuthInputs"
 import { toast } from "sonner"
+import { apiFetch } from "@/lib/api"
 
 export default function SignupForm() {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    rememberMe: false,
-  })
+ const [formData, setFormData] = useState({
+  fullName: "",
+  email: "",
+  password: "",
+  rememberMe: false,
+})
 
-  const [showPassword, setShowPassword] = useState(false)
+const [showPassword, setShowPassword] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, type, checked, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }))
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, type, checked, value } = e.target
+  setFormData((prev) => ({
+    ...prev,
+    [name]: type === "checkbox" ? checked : value,
+  }))
+}
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+
+  try {
+    await apiFetch("/user", {
+      method: "POST",
+      body: JSON.stringify({
+        fullname: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+      }),
+    })
+
+    toast.success("Signup successful!")
+
+    setFormData({
+      fullName: "",
+      email: "",
+      password: "",
+      rememberMe: false,
+    })
+  } catch (err: any) {
+    toast.error(err.message || "Signup failed. Please try again.")
   }
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      const response = await fetch("", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.message || "Signup failed. Please try again.")
-      } else {
-        toast.success("Signup successful!")
-        setFormData({
-          fullName: "",
-          email: "",
-          password: "",
-          rememberMe: false,
-        })
-      }
-    } catch (err) {
-      toast.error("An unexpected error occurred. Please try again.")
-    }
-  }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md">
