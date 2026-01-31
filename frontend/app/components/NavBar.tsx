@@ -4,6 +4,7 @@ import { Menu } from "lucide-react"
 import { useState } from "react"
 import Button from "./ui/Button"
 import Link from "next/link"
+import Logo from "./ui/Logo"
 
 export default function NavBar() {
   const [open, setOpen] = useState<boolean>(false)
@@ -12,14 +13,7 @@ export default function NavBar() {
       <div className="flex items-center justify-between">
 
         {/* lOGO */}
-      <div className="flex md:flex-row items-center">
-        <div className="text-[35px] 2xl:text-[45px]">
-          <HeadCircuitIcon  />
-        </div>
-        <h1 className="font-bold text-xl pt-2 2xl:text-2xl">
-          Code<span className="text-primary">Mind</span>
-        </h1>
-      </div>
+      <Logo />
 
       {/* hamburger button */}
       <button 

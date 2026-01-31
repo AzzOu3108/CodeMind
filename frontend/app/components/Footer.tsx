@@ -78,7 +78,7 @@ export default function Footer() {
        </div>
       
 
-      <div className='flex flex-col items-center  col-span-2 lg:col-auto'>
+      <div className='flex flex-col items-center col-span-2 lg:col-auto'>
         <p className='font-semibold'>Follow Us</p>
         <div className='mt-4 flex gap-4'>
           <Link href="#"

@@ -1,14 +1,14 @@
-import { ReactNode } from "react"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { DashboardSidebar } from "./components/DashboardSidebar"
 
-type DashboardLayoutProps = {
-  children: ReactNode
-}
-
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      {children}
+      <DashboardSidebar />
+      <main>
+        <SidebarTrigger />
+        {children}
+      </main>
     </SidebarProvider>
   )
 }
