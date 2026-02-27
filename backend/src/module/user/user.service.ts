@@ -26,13 +26,13 @@ export class UserService {
     throw new BadRequestException('Email already taken');
   }
 
-  const existingName = await this.userRepo.findOne({
-    where: { fullname },
-  });
+  // const existingName = await this.userRepo.findOne({
+  //   where: { fullname },
+  // });
 
-  if (existingName) {
-    throw new BadRequestException('Name already taken');
-  }
+  // if (existingName) {
+  //   throw new BadRequestException('Name already taken');
+  // }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 

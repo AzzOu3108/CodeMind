@@ -1,8 +1,6 @@
-import { Controller, Post, Body, Req, UseGuards, Res } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, Res, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { RefreshToken } from './entities/refresh.entity';
-import { JwtRefreshGuard } from './guards/jwt.refresh.guard';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
 
 
@@ -17,6 +15,13 @@ export class AuthController {
   ) {
     const user = await this.authService.validateUser(dto.email, dto.password);
     const {accessToken, refreshToken} = await this.authService.login(user.id);
+    
+    res.cookie('access_token', accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+  });
 
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
@@ -24,7 +29,7 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return {accessToken}
+    return {message: 'Login successful', accessToken, refreshToken}
   }
 
   
@@ -43,5 +48,15 @@ export class AuthController {
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
     return this.authService.logout(req.user.userId)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getProfile(@Req() req){
+     return {
+      name: req.user.name,
+      email: req.user.email,
+      avatar: req.user.avatar || null,
+    };
   }
 }

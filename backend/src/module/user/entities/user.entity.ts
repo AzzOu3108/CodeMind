@@ -1,7 +1,7 @@
 import { RefreshToken } from "src/auth/entities/refresh.entity";
 import { Course } from "src/module/course/entities/course.entity";
 import { Progress } from "src/module/progress/entities/progress.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('user')
 export class User {
@@ -16,6 +16,9 @@ export class User {
 
     @Column({ type: 'varchar', length: 255, select:false })
     password: string;
+
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    avatar: string | null;
 
     @CreateDateColumn({
         name: 'created_at',

@@ -75,3 +75,10 @@ html {
     animation: scale-in 0.2s ease-out;
   }
 }
+
+@media (max-width: 768px) {
+  [data-state="open"] {
+    backdrop-filter: blur(4px);
+    background-color: rgba(250, 249, 255, 1);
+  }
+}

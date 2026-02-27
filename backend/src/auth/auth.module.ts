@@ -11,9 +11,11 @@ import { JwtStrategy } from './jwt.strategy';
 @Module({
   imports:[
     PassportModule,
-    JwtModule.register({
+    JwtModule.registerAsync({
+      useFactory: () =>({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '15m' },
+      })
     }),
     TypeOrmModule.forFeature([RefreshToken]),
     UserModule,

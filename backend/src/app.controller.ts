@@ -12,7 +12,6 @@ export class AppController {
 
   @Get('cookies')
   getCookies(@Req() request) {
-    console.log(request.cookies); 
     const token = request.cookies['token'];
   }
 }

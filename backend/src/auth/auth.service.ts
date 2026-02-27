@@ -26,7 +26,7 @@ export class AuthService {
    await this.refreshTokenRepo.delete({user: {id: userId}})
    
    const accessToken = this.jwtService.sign(
-      { sub: userId, email: user.email ?? '' },
+      { sub: userId, email: user.email ?? '', name: user.fullname ?? '', avatar: user.avatar ?? null },
       { secret: process.env.JWT_SECRET ?? 'default_jwt_secret', expiresIn: '15m' }
    );
    

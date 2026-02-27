@@ -26,6 +26,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Home, BookOpen, Plus, ChevronUp, Settings, LogOut } from "lucide-react";
 import Logo from "@/app/components/ui/Logo";
+import { apiFetch, getCurrentUser } from "@/lib/api";
+import { useEffect, useState } from "react";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
@@ -33,14 +35,12 @@ const menuItems = [
   { title: "Create Course", icon: Plus, url: "/dashboard/create-course-form" },
 ];
 
-// Type for user data
 interface UserData {
   name: string;
   email: string;
   avatar?: string;
 }
 
-// Props interface if you want to pass user data
 interface DashboardSidebarProps {
   user?: UserData;
   onLogout?: () => void;
@@ -51,29 +51,43 @@ export function DashboardSidebar({ user, onLogout }: DashboardSidebarProps) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
-  // Default user data if not provided
-  const userData = user || {
+  const [userData, setUserData] = useState<UserData> ({
     name: "Guest User",
     email: "guest@example.com",
     avatar: "",
-  };
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Handle logout
+  useEffect(()=>{
+    async function loadUser() {
+      try {
+        const user = await getCurrentUser()
+        if(user){
+          setUserData(user)
+        }
+      } catch (error) {
+        console.error('Failed to load user:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadUser()
+  },[])
+
+
   const handleLogout = async () => {
     if (onLogout) {
       onLogout();
     } else {
-      // Default logout behavior - clear cookies and redirect
       try {
-        await fetch('/auth/logout', {
+        await apiFetch('/auth/logout', {
           method: 'POST',
           credentials: 'include',
         });
         window.location.href = '/login';
       } catch (error) {
         console.error('Logout failed:', error);
-        // Fallback: just redirect
-        window.location.href = '/login';
+        window.location.href = 'auth/login';
       }
     }
   };

@@ -4,10 +4,12 @@ import AuthInputs from "@/app/components/ui/AuthInputs"
 import { apiFetch } from "@/lib/api"
 import { Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 import { toast } from "sonner"
 
 export default function LoginForm() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -31,8 +33,9 @@ export default function LoginForm() {
           password: formData.password,
         }),
       })
-
+    
       toast.success("Login successful!")
+      router.push("/dashboard")
     } catch (err:any) {
       toast.error( err.message ||"An error occurred. Please try again.")
     }

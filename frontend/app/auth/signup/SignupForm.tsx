@@ -7,8 +7,10 @@ import { Eye, EyeOff } from "lucide-react"
 import AuthInputs from "@/app/components/ui/AuthInputs"
 import { toast } from "sonner"
 import { apiFetch } from "@/lib/api"
+import { useRouter } from "next/navigation"
 
 export default function SignupForm() {
+  const router = useRouter()
  const [formData, setFormData] = useState({
   fullName: "",
   email: "",
@@ -30,7 +32,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
 
   try {
-    await apiFetch("/user", {
+    const data = await apiFetch("/user", {
       method: "POST",
       body: JSON.stringify({
         fullname: formData.fullName,
@@ -38,7 +40,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         password: formData.password,
       }),
     })
-
+    
     toast.success("Signup successful!")
 
     setFormData({
@@ -47,6 +49,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       password: "",
       rememberMe: false,
     })
+    router.push("/dashboard")
   } catch (err: any) {
     toast.error(err.message || "Signup failed. Please try again.")
   }

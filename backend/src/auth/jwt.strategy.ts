@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt'){
@@ -11,12 +12,25 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt'){
         }
 
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: ExtractJwt.fromExtractors([
+              ExtractJwt.fromAuthHeaderAsBearerToken(),
+              (request: Request) => {
+                return request?.cookies?.access_token;
+              },
+            ]),
             secretOrKey: secret,
+            passReqToCallback: false,
         })
     }
 
-    async validate(payload: { sub: number; email?: string }) {
-      return { userId: payload.sub, email: payload.email };
+    async validate(payload: { sub: number; email?: string; name?: string, avatar?: string | null }) {
+        console.log('JWT validate called', payload);
+      return { 
+        userId: payload.sub,
+        id: payload.sub,
+        email: payload.email, 
+        name: payload.name, 
+        avatar: payload.avatar 
+      };
     }
 }
