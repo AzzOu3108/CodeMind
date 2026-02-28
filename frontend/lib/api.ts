@@ -4,7 +4,6 @@ export async function apiFetch(
     path: string,
     options: RequestInit = {}
 ){
-      console.log('Fetching:', `${API_URL}${path}`)
     const res = await fetch (`${API_URL}${path}`, {
         ...options,
         credentials: "include",
@@ -14,11 +13,22 @@ export async function apiFetch(
         }
     })
 
-    if(!res.ok){
+    if(res.status === 401 && path !== '/auth/refresh' ){
+        const refreshed = await fetch(`${API_URL}/auth/refresh`, {
+            method: 'POST',
+            credentials: 'include'
+        })
+        if (refreshed.ok) {
+            return apiFetch(path, options)
+        }
+        throw new Error('Unauthorized')
+    }
+
+    if (!res.ok) {
         const error = await res.json().catch(() => ({}))
         throw new Error(error.message || "API error")
     }
-    return res.json()
+  return res.json()
 }
 
 export async function getCurrentUser() {
@@ -32,7 +42,6 @@ export async function getCurrentUser() {
             avatar: data.avatar || "",
         }
     } catch (error) {
-        window.location.href = '/login'
         console.error("Failed to fetch user:", error)
         return null
     }

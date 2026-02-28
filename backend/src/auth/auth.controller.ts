@@ -34,11 +34,26 @@ export class AuthController {
 
   
   @Post('refresh')
-  async refresh(@Req() req) {
+  async refresh(@Req() req, @Res({ passthrough: true }) res: any) {
   const refreshToken = req.cookies?.refresh_token;
-  const { accessToken } = await this.authService.refresh(refreshToken);
+  const { accessToken, refreshToken: newRefreshToken } = await this.authService.refresh(refreshToken);
+
+  res.cookie('access_token', accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+
+  res.cookie('refresh_token', newRefreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
   return { accessToken };
-  }
+}
   
   @UseGuards(JwtAuthGuard)
   @Post('logout')

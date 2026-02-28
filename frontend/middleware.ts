@@ -13,7 +13,8 @@ export async function middleware(request: NextRequest) {
 
   if(isDashboard && !accessToken && refreshToken){
     try {
-        const response = await fetch(`http://localhost:8000/auth/refresh`, {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const response = await fetch(`${API_URL}/auth/refresh`, {
             method: 'POST',
             headers: {
                 'Cookie': `refresh_token=${refreshToken}`
@@ -25,12 +26,12 @@ export async function middleware(request: NextRequest) {
         if(response.ok){
             const data = await response.json()
 
-            const nextResponse = NextResponse.next()
+            const nextResponse = NextResponse.redirect(request.url)
             nextResponse.cookies.set('access_token', data.accessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'lax',
-                maxAge: 24 * 60 * 60 * 1000,
+                maxAge: 24 * 60 * 60,
             })
 
             return nextResponse
