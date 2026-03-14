@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { Request } from 'express';
+import { JwtPayload } from "./interfaces/jwt-payload.interface";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt'){
@@ -23,14 +24,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt'){
         })
     }
 
-    async validate(payload: { sub: number; email?: string; name?: string, avatar?: string | null }) {
+    async validate(payload: { sub: number; email?: string; name?: string, avatar?: string | null }) : Promise<JwtPayload> {
         console.log('JWT validate called', payload);
       return { 
         userId: payload.sub,
         id: payload.sub,
         email: payload.email, 
         name: payload.name, 
-        avatar: payload.avatar 
+        avatar: payload.avatar ?? null,
       };
     }
 }

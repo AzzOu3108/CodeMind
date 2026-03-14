@@ -46,3 +46,16 @@ export async function getCurrentUser() {
         return null
     }
 }
+
+export async function updateUser(data: {
+  fullname?: string
+  email?: string
+  avatar?: string
+  password?: string
+  confirmPassword?: string
+}) {
+  return apiFetch("/user/me", {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  })
+}

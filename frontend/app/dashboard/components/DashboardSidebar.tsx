@@ -47,23 +47,27 @@ interface DashboardSidebarProps {
 }
 
 export function DashboardSidebar({ user, onLogout }: DashboardSidebarProps) {
-  const pathname = usePathname();
-  const { state } = useSidebar();
+    const pathname = usePathname();
+  const { state, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
 
-  const [userData, setUserData] = useState<UserData> ({
-    name: "Guest User",
-    email: "guest@example.com",
+  const [userData, setUserData] = useState<UserData>({
+    name: "",
+    email: "",
     avatar: "",
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(()=>{
+  useEffect(() => {
     async function loadUser() {
       try {
         const user = await getCurrentUser()
-        if(user){
-          setUserData(user)
+        if (user) {
+          setUserData({
+            name: user.name || "", 
+            email: user.email || "",
+            avatar: user.avatar || "",
+          })
         }
       } catch (error) {
         console.error('Failed to load user:', error);
@@ -72,8 +76,7 @@ export function DashboardSidebar({ user, onLogout }: DashboardSidebarProps) {
       }
     }
     loadUser()
-  },[])
-
+  }, [])
 
   const handleLogout = async () => {
     if (onLogout) {
@@ -84,10 +87,10 @@ export function DashboardSidebar({ user, onLogout }: DashboardSidebarProps) {
           method: 'POST',
           credentials: 'include',
         });
-        window.location.href = '/login';
       } catch (error) {
         console.error('Logout failed:', error);
-        window.location.href = 'auth/login';
+      } finally {
+        window.location.href = '/auth/login'; 
       }
     }
   };
@@ -136,7 +139,7 @@ export function DashboardSidebar({ user, onLogout }: DashboardSidebarProps) {
                     tooltip={item.title}
                     className="transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 hover:text-purple-700 hover:bg-purple-50 data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 "
                   > 
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={()=> setOpenMobile(false)}>
                       <item.icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                       <span>{item.title}</span>
                     </Link>
@@ -189,7 +192,8 @@ export function DashboardSidebar({ user, onLogout }: DashboardSidebarProps) {
                 sideOffset={4}
               >
                 <DropdownMenuItem asChild className="group transition-colors duration-200 hover:bg-purple-50">
-                  <Link href="/dashboard/settings" className="cursor-pointer">
+                  <Link href="/dashboard/settings" onClick={()=> setOpenMobile(false)}
+                  className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
                     <span className="group-hover:text-purple-800 transition-colors duration-200">Settings</span>
                   </Link>

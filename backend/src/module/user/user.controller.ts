@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, ParseIntPipe, Patch, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { TrimPipe } from 'src/common/pipes/trim/trim.pipe';
 import { UserExistsPipe } from 'src/common/pipes/user-exists/user-exists.pipe';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import type { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
 
 @Controller('user')
 export class UserController {
@@ -24,11 +27,12 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
   update(
-    @Param('id', ParseIntPipe) id: number, 
+    @CurrentUser() user: JwtPayload,
     @Body(new TrimPipe()) updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+    return this.userService.update(user.id, updateUserDto);
   }
 
   @Delete(':id')
