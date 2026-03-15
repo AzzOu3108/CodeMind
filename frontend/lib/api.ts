@@ -37,7 +37,7 @@ export async function getCurrentUser() {
             method: "GET",
         })
         return {
-            name: data.name,
+            name: data.fullname,
             email: data.email,
             avatar: data.avatar || "",
         }
