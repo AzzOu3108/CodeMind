@@ -5,12 +5,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import { Course } from '../course/entities/course.entity';
 
 @Injectable()
 export class UserService {
   constructor(
   @InjectRepository(User)
-  private readonly userRepo: Repository<User>
+  private readonly userRepo: Repository<User>,
+
+  @InjectRepository(Course)
+  private readonly courseRepo: Repository<Course>,
   ){}
 
   async create(createUserDto: CreateUserDto) {
@@ -119,6 +123,7 @@ export class UserService {
     throw new NotFoundException('User not found');
   }
 
+  await this.courseRepo.delete({ user: { id } });
   await this.userRepo.remove(user);
 
   return { message: 'User deleted successfully' };

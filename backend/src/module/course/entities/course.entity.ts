@@ -45,7 +45,7 @@ export class Course {
 
     //Relationships
 
-    @ManyToOne(() => User, (user) => user.courses )
+    @ManyToOne(() => User, (user) => user.courses, {onDelete:'CASCADE'} )
     @JoinColumn({ name: 'user_id' })
     user: User;
 

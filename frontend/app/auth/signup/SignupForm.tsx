@@ -40,6 +40,14 @@ const handleSubmit = async (e: React.FormEvent) => {
         password: formData.password,
       }),
     })
+
+    await apiFetch("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+    })
     
     toast.success("Signup successful!")
 

@@ -17,7 +17,7 @@ export class User {
     @Column({ type: 'varchar', length: 255, select:false })
     password: string;
 
-    @Column({ type: 'varchar', length: 255, nullable: true })
+    @Column({ type: 'text', nullable: true })
     avatar: string | null;
 
     @CreateDateColumn({
@@ -36,7 +36,7 @@ export class User {
     updated_at: Date;
 
     
-    @OneToMany(() => Course, (course) => course.user)
+    @OneToMany(() => Course, (course) => course.user, {onDelete: 'CASCADE'})
     courses: Course[];
 
     @OneToMany(()=> Progress, (p)=>p.user)

@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, ParseIntPipe, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, ParseIntPipe, Patch, UseGuards, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -35,8 +36,23 @@ export class UserController {
     return this.userService.update(user.id, updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe, UserExistsPipe) id: number) {
-    return this.userService.remove(id);
+  @UseGuards(JwtAuthGuard)
+  @Delete('me')
+  async remove(@CurrentUser() user: JwtPayload, @Res({ passthrough: true }) res: Response) {
+    await this.userService.remove(user.id)
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    res.clearCookie('refresh_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  })
+
+      return res.json({ message: 'User deleted successfully' })
   }
 }

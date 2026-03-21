@@ -65,6 +65,17 @@ function cropImageToBlob(
   )
 }
 
+async function blobUrlToBase64(blobUrl: string): Promise<string> {
+  const response = await fetch(blobUrl)
+  const blob = await response.blob()
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
 type SaveStatus = "idle" | "loading" | "success" | "error"
 
 export default function AccountDetails() {
@@ -125,13 +136,16 @@ export default function AccountDetails() {
     setSaveStatus('loading')
     setErrorMsg("")
 
+    const base64 = avatarSrc?.startsWith("blob:") ? await blobUrlToBase64(avatarSrc) : null
     try {
       await updateUser({
         fullname: fullName,
         email,
-        ...(avatarSrc?.startsWith("blob:") ? { avatar: avatarSrc } : {}),
+        ...(avatarSrc?.startsWith("blob:") ? { avatar: await blobUrlToBase64(avatarSrc) } : {}),
         ...(password ? { password, confirmPassword } : {}),
       })
+
+      if(base64) setAvatarSrc(base64)
       setSaveStatus("success")
       // clear password fields after successful save
       setPassword("")

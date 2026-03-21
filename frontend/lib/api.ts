@@ -59,3 +59,9 @@ export async function updateUser(data: {
     body: JSON.stringify(data),
   })
 }
+
+export async function deleteUser() {
+  return apiFetch("/user/me", {
+    method: "DELETE",
+  })
+}
