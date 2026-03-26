@@ -40,6 +40,7 @@ export async function getCurrentUser() {
             name: data.fullname,
             email: data.email,
             avatar: data.avatar || "",
+            createdAt: data.created_at,
         }
     } catch (error) {
         console.error("Failed to fetch user:", error)
