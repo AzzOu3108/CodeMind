@@ -1,5 +1,10 @@
+"use client"
+
 import React from 'react'
+import { motion } from 'framer-motion'
 import Cards from './Cards'
+
+const SPRING: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
 const courses = [
   {
@@ -17,7 +22,7 @@ const courses = [
     description: "Understand the language of the web and start building interactive websites step-by-step.",
     icon: <img src="/assets/javascript-svgrepo-com.svg" alt="JavaScript" className="w-10 h-10" />
   }
-];
+]
 
 export default function CoursesCards() {
   return (
@@ -28,16 +33,22 @@ export default function CoursesCards() {
           const isOdd = courses.length % 2 !== 0
 
           return (
-            <Cards
+            <motion.div
               key={index}
-              title={course.title}
-              description={course.description}
-              icon={course.icon}
-              iconBackground={false}
-              className={`p-10 mt-11 ${
-                isLast && isOdd ? "md:col-span-2 md:col-start-1 lg:col-span-1 lg:col-start-auto mx-auto" : ""
-              }`}
-            />
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ delay: index * 0.15, duration: 0.6, ease: SPRING }}
+              className={isLast && isOdd ? "md:col-span-2 md:col-start-1 lg:col-span-1 lg:col-start-auto mx-auto" : ""}
+            >
+              <Cards
+                title={course.title}
+                description={course.description}
+                icon={course.icon}
+                iconBackground={false}
+                className="p-10 mt-11"
+              />
+            </motion.div>
           )
         })}
       </div>
