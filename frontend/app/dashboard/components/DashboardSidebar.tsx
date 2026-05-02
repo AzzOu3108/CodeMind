@@ -32,7 +32,7 @@ import { useEffect, useState } from "react";
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
   { title: "My Courses", icon: BookOpen, url: "/dashboard/courses" },
-  { title: "Create Course", icon: Plus, url: "/dashboard/create-course-form" },
+  { title: "Create Course", icon: Plus, url: "/dashboard/createCourse" },
 ];
 
 interface UserData {

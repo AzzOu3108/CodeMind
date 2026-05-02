@@ -2,36 +2,17 @@
 
 import { getCurrentUser } from '@/lib/api';
 import { CurrentUser } from '@/types/user';
-import { BookOpen, CheckCircle, TrendingUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
+import TotalCourses from '../../components/cards/StatusCards/TotalCourses';
+import InProgress from '../../components/cards/StatusCards/InProgress';
+import Completed from '../../components/cards/StatusCards/Completed';
 
 function isFirstVisit(create_at: string){
   const created = new Date(create_at).getTime();
   const now = Date.now()
   const diffInMinutes = (now - created) /1000 /60
-  return diffInMinutes <5
+  return diffInMinutes < 5
 }
-
-const stats = [
-  {
-    label: "Total Courses",
-    value: 3,
-    icon: BookOpen,
-    iconColor: "text-violet-500",
-  },
-  {
-    label: "In Progress",
-    value: 2,
-    icon: TrendingUp,
-    iconColor: "text-yellow-500",
-  },
-  {
-    label: "Completed",
-    value: 0,
-    icon: CheckCircle,
-    iconColor: "text-green-500",
-  },
-];
 
 export default function DashboardContent() {
   const [user, setUser] = useState<CurrentUser | null>(null)
@@ -47,16 +28,16 @@ export default function DashboardContent() {
   const firstVisit = user ? isFirstVisit(user.create_at) : false
 
   const greeting = loading
-  ? null
-  : firstVisit
-  ? "Welcome to CodeMind!"
-  : `Welcome back, ${user?.name?.split(" ")[0]}!`
+    ? null
+    : firstVisit
+    ? "Welcome to CodeMind!"
+    : `Welcome back, ${user?.name?.split(" ")[0]}!`
 
   const subtext = loading
-  ? null
-  : firstVisit
-  ? "We're glad to have you. Let's start your learning journey."
-  : "Continue your learning journey with CodeMind.";
+    ? null
+    : firstVisit
+    ? "We're glad to have you. Let's start your learning journey."
+    : "Continue your learning journey with CodeMind.";
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,23 +62,11 @@ export default function DashboardContent() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {stats.map(({ label, value, icon: Icon, iconColor }) => (
-          <div
-            key={label}
-            className="rounded-xl border border-gray-200 bg-card p-5 shadow-sm flex flex-col gap-2 hover:shadow-[0_0_12px_3px_rgba(139,92,246,0.18)] transition-all duration-500 ease-in-out"          >
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Icon className={`h-4 w-4 ${iconColor}`} />
-              {label}
-            </div>
-            <p className="text-3xl font-bold">{value}</p>
-          </div>
-        ))}
+        <TotalCourses count={3} />
+        <InProgress count={2} />
+        <Completed count={0} />
       </div>
 
-      {/* Course cards */}
-      <div className='pt-3'>
-        <h2 className='text-xl font-semibold'>Your Courses</h2>
-      </div>
     </div>
   );
 }

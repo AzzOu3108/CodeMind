@@ -9,6 +9,7 @@
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  scroll-gutter: stable;
 }
 
 @layer utilities {
