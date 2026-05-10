@@ -11,6 +11,8 @@ import { ProgressModule } from './module/progress/progress.module';
 import { ChapiterModule } from './module/chapter/chapter.module';
 import { ResourcesModule } from './module/resources/resources.module';
 import { AuthModule } from './auth/auth.module';
+import { GeminiModule } from './gemini/gemini.module';
+import { YoutubeModule } from './youtube/youtube.module';
 
 @Module({
   imports: [
@@ -36,7 +38,7 @@ import { AuthModule } from './auth/auth.module';
       },
       inject: [ConfigService],
     }),
-    UserModule, CourseModule, ChapiterModule, CourseChapiterModule, ProgressModule, ResourcesModule, AuthModule],
+    UserModule, CourseModule, ChapiterModule, CourseChapiterModule, ProgressModule, ResourcesModule, AuthModule, GeminiModule, YoutubeModule],
   controllers: [AppController],
   providers: [AppService],
 })

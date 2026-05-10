@@ -5,6 +5,9 @@ import { Course } from './entities/course.entity';
 import { User } from 'src/module/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Chapiter } from 'src/module/chapter/entities/chapiter.entity';
+import { CourseChapiter } from '../course_chapiter/entities/course_chapiter.entity';
+import { GeminiService } from 'src/gemini/gemini.service';
+import { YoutubeService, YoutubeVideo } from 'src/youtube/youtube.service';
 
 @Injectable()
 export class CourseService {
@@ -14,7 +17,12 @@ export class CourseService {
   @InjectRepository(User)
   private userRepo: Repository<User>,
   @InjectRepository(Chapiter)
-  private chapiterRepo: Repository<Chapiter>
+  private chapiterRepo: Repository<Chapiter>,
+  @InjectRepository(CourseChapiter)
+  private courseChapiterRepo: Repository<CourseChapiter>,
+
+  private geminiService: GeminiService,
+  private youtubeService: YoutubeService,
  ){}
 
   async create(dto: CreateCourseDto, userId: number) {
@@ -46,16 +54,98 @@ export class CourseService {
     );
   }
 
+  const cached = existingCourse.find(
+    c => c.difficulty === dto.difficulty && c.chapiter_count === dto.chapiter_count
+  )
+
+  if (cached) {
+    const full = await this.findOne(cached.id);
+    return this.formatCourseResponse(full);
+  }
+
+  const chapiterTitles = await this.geminiService.generateChapterTitles(
+    dto.title,
+    dto.chapiter_count,
+    dto.difficulty,
+    dto.description,
+  );
+
   const course = this.courseRepo.create({
     title: dto.title.trim(),
-    description: dto.description.trim(),
+    description: dto.description?.trim() ?? '',
     chapiter_count: dto.chapiter_count,
     include_video: dto.include_video,
     difficulty: dto.difficulty,
     progress: 0,
     user,
   });
-  return this.courseRepo.save(course);
+  const savedCourse = await this.courseRepo.save(course);
+
+  for (let i = 0; i < chapiterTitles.length; i++) {
+    const chapterTitle = chapiterTitles[i];
+
+    // generate content
+    const content = await this.geminiService.generateChapterContent(
+      dto.title,
+      chapterTitle,
+      dto.difficulty,
+      i
+    );
+
+    // save chapiter
+    const chapiter = this.chapiterRepo.create({ title: chapterTitle, content });
+    const savedChapiter = await this.chapiterRepo.save(chapiter);
+
+    // fetch video if requested
+    let videoData: YoutubeVideo | null = null;
+    if (dto.include_video) {
+      videoData = await this.youtubeService.searchVideo(
+        chapterTitle,
+        dto.title,
+        dto.difficulty
+      );
+    }
+
+    // save join table row
+    const courseChapiter = this.courseChapiterRepo.create({
+      course_id: savedCourse.id,
+      chapiter_id: savedChapiter.id,
+      order: i + 1,
+      video_id: videoData?.videoId ?? null,
+      video_title: videoData?.title ?? null,
+      video_thumbnail: videoData?.thumbnail ?? null,
+      video_url: videoData?.url ?? null,
+    } as Partial<CourseChapiter>);
+    await this.courseChapiterRepo.save(courseChapiter);
+  }
+
+  // return full formatted response
+  const fullCourse = await this.findOne(savedCourse.id);
+  return this.formatCourseResponse(fullCourse);
+}
+
+private formatCourseResponse(course: Course) {
+  return {
+    id: course.id,
+    title: course.title,
+    description: course.description,
+    difficulty: course.difficulty,
+    chapiter_count: course.chapiter_count,
+    include_video: course.include_video,
+    created_at: course.created_at,
+    chapters: course.courseChapiter.map(cc => ({
+      id: cc.chapiter.id,
+      order: cc.order,
+      title: cc.chapiter.title,
+      content: cc.chapiter.content,
+      video: cc.video_id ? {
+        videoId: cc.video_id,
+        title: cc.video_title,
+        thumbnail: cc.video_thumbnail,
+        url: cc.video_url,
+      } : null,
+    })),
+  };
 }
 
   async findAll() {

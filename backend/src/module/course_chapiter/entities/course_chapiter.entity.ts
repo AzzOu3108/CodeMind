@@ -22,4 +22,16 @@ export class CourseChapiter {
 
     @Column({ type: 'int' })
     order: number;
+
+    @Column({ type: 'varchar', nullable: true })
+    video_id: string;
+
+    @Column({ type: 'varchar', nullable: true })
+    video_title: string;
+
+    @Column({ type: 'varchar', nullable: true })
+    video_thumbnail: string;
+
+    @Column({ type: 'varchar', nullable: true })
+    video_url: string;
 }
