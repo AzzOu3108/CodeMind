@@ -2,9 +2,9 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Chapiter } from './entities/chapiter.entity';
+import { Chapiter } from './entities/chapter.entity';
 import { Repository } from 'typeorm';
-import { CourseChapiter } from '../course_chapiter/entities/course_chapiter.entity';
+import { CourseChapiter } from '../course_chapter/entities/course_chapiter.entity';
 import { CourseService } from '../course/course.service';
 import { title } from 'process';
 

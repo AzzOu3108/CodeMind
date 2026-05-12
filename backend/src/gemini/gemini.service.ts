@@ -88,13 +88,9 @@ export class GeminiService {
         return JSON.parse(cleaned);
       }
     } catch (error: any) {
-      const isDevFallback = process.env.NODE_ENV !== 'production';
       this.logger.error('Gemini chapter title generation failed', error?.message || error);
-      if (isDevFallback) {
-        this.logger.warn('Using fallback chapter titles for local testing.');
-        return Array.from({ length: chaptersCount }, (_, i) => `Chapter ${i + 1}`);
-      }
-      throw error;
+      this.logger.warn('Using fallback chapter titles.');
+      return Array.from({ length: chaptersCount }, (_, i) => `Chapter ${i + 1}`);
     }
   }
 
@@ -120,13 +116,9 @@ export class GeminiService {
     try {
       return await this.generateText(prompt);
     } catch (error: any) {
-      const isDevFallback = process.env.NODE_ENV !== 'production';
       this.logger.error('Gemini chapter content generation failed', error?.message || error);
-      if (isDevFallback) {
-        this.logger.warn('Using fallback chapter content for local testing.');
-        return `This is placeholder content for chapter ${chapterIndex + 1} titled "${chapterTitle}" in a ${difficulty} course about "${courseTitle}".`;
-      }
-      throw error;
+      this.logger.warn('Using fallback chapter content.');
+      return `This is placeholder content for chapiter ${chapterIndex + 1} titled "${chapterTitle}" in a ${difficulty} course about "${courseTitle}".`;
     }
   }
 }

@@ -1,5 +1,5 @@
-import { Chapiter } from "src/module/chapter/entities/chapiter.entity";
-import { ChapiterResource } from "src/module/chapiter_resources/entities/chapiter_resource.entity";
+import { Chapiter } from "src/module/chapter/entities/chapter.entity";
+import { ChapiterResource } from "src/module/chapter_resources/entities/chapter_resource.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('resources')

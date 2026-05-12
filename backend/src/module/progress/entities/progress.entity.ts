@@ -1,4 +1,4 @@
-import { Chapiter } from "src/module/chapter/entities/chapiter.entity";
+import { Chapiter } from "src/module/chapter/entities/chapter.entity";
 import { User } from "src/module/user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 

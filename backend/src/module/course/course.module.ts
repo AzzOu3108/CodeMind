@@ -4,8 +4,8 @@ import { CourseService } from './course.service';
 import { CourseController } from './course.controller';
 import { Course } from './entities/course.entity';
 import { User } from 'src/module/user/entities/user.entity';
-import { Chapiter } from 'src/module/chapter/entities/chapiter.entity';
-import { CourseChapiter } from '../course_chapiter/entities/course_chapiter.entity';
+import { Chapiter } from 'src/module/chapter/entities/chapter.entity';
+import { CourseChapiter } from '../course_chapter/entities/course_chapiter.entity';
 import { GeminiModule } from 'src/gemini/gemini.module';
 import { YoutubeModule } from 'src/youtube/youtube.module';
 

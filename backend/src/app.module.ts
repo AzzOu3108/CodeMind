@@ -6,7 +6,7 @@ import databaseConfig from './config/database.config';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CourseModule } from './module/course/course.module';
-import { CourseChapiterModule } from './module/course_chapiter/course_chapiter.module';
+import { CourseChapiterModule } from './module/course_chapter/course_chapiter.module';
 import { ProgressModule } from './module/progress/progress.module';
 import { ChapiterModule } from './module/chapter/chapter.module';
 import { ResourcesModule } from './module/resources/resources.module';

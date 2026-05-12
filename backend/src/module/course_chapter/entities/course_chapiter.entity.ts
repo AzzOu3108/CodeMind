@@ -1,5 +1,5 @@
 
-import { Chapiter } from "src/module/chapter/entities/chapiter.entity";
+import { Chapiter } from "src/module/chapter/entities/chapter.entity";
 import { Course } from "src/module/course/entities/course.entity";
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 

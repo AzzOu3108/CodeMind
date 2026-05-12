@@ -4,8 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Course } from './entities/course.entity';
 import { User } from 'src/module/user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { Chapiter } from 'src/module/chapter/entities/chapiter.entity';
-import { CourseChapiter } from '../course_chapiter/entities/course_chapiter.entity';
+import { Chapiter } from 'src/module/chapter/entities/chapter.entity';
+import { CourseChapiter } from '../course_chapter/entities/course_chapiter.entity';
 import { GeminiService } from 'src/gemini/gemini.service';
 import { YoutubeService, YoutubeVideo } from 'src/youtube/youtube.service';
 

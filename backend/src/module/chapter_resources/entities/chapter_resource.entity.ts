@@ -1,4 +1,4 @@
-import { Chapiter } from "src/module/chapter/entities/chapiter.entity";
+import { Chapiter } from "src/module/chapter/entities/chapter.entity";
 import { Resources } from "src/module/resources/entities/resources.entity";
 import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 

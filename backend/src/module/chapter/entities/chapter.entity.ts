@@ -1,5 +1,5 @@
-import { ChapiterResource } from "src/module/chapiter_resources/entities/chapiter_resource.entity";
-import { CourseChapiter } from "src/module/course_chapiter/entities/course_chapiter.entity";
+import { ChapiterResource } from "src/module/chapter_resources/entities/chapter_resource.entity";
+import { CourseChapiter } from "src/module/course_chapter/entities/course_chapiter.entity";
 import { Progress } from "src/module/progress/entities/progress.entity";
 import { Resources } from "src/module/resources/entities/resources.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm";

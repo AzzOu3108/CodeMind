@@ -1,4 +1,4 @@
-import { CourseChapiter } from "src/module/course_chapiter/entities/course_chapiter.entity";
+import { CourseChapiter } from "src/module/course_chapter/entities/course_chapiter.entity";
 import { User } from "src/module/user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
