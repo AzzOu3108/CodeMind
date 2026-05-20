@@ -34,12 +34,22 @@ import { LessonModule } from './module/lesson/lesson.module';
           password: db.password,
           database: db.name,
           autoLoadEntities: true,
-          synchronize: db.synchronize
-        }
+          synchronize: db.synchronize,
+        };
       },
       inject: [ConfigService],
     }),
-    UserModule, CourseModule, ChapiterModule, CourseChapiterModule, ProgressModule, ResourcesModule, AuthModule, GeminiModule, YoutubeModule, LessonModule],
+    UserModule,
+    CourseModule,
+    ChapiterModule,
+    CourseChapiterModule,
+    ProgressModule,
+    ResourcesModule,
+    AuthModule,
+    GeminiModule,
+    YoutubeModule,
+    LessonModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

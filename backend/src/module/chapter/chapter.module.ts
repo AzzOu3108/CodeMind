@@ -9,9 +9,13 @@ import { CourseChapiter } from '../course_chapter/entities/course_chapiter.entit
 import { Lesson } from '../lesson/entities/lesson.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Chapiter, CourseChapiter, Lesson]),CourseModule , ChapiterResourcesModule],
+  imports: [
+    TypeOrmModule.forFeature([Chapiter, CourseChapiter, Lesson]),
+    CourseModule,
+    ChapiterResourcesModule,
+  ],
   controllers: [ChapterController],
   providers: [ChapterService],
-  exports: [ChapterService]
+  exports: [ChapterService],
 })
 export class ChapiterModule {}

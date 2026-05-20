@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from 'src/module/user/user.service';
@@ -6,86 +11,87 @@ import { Repository } from 'typeorm';
 import { RefreshToken } from './entities/refresh.entity';
 import * as bcrypt from 'bcryptjs';
 
-
 @Injectable()
 export class AuthService {
- constructor(
+  constructor(
     private userService: UserService,
-    private jwtService : JwtService,
+    private jwtService: JwtService,
     @InjectRepository(RefreshToken)
-    private refreshTokenRepo : Repository<RefreshToken>
- ){}
+    private refreshTokenRepo: Repository<RefreshToken>,
+  ) {}
 
- async login (userId: number){
-   const user = await this.userService.findRawById(userId)
+  async login(userId: number) {
+    const user = await this.userService.findRawById(userId);
 
-   if (!user) {
-     throw new NotFoundException('User not found');
-   }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-   await this.refreshTokenRepo.delete({user: {id: userId}})
-   
-   const accessToken = this.jwtService.sign(
-      { sub: userId, email: user.email ?? '', name: user.fullname ?? ''},
-      { secret: process.env.JWT_SECRET ?? 'default_jwt_secret', expiresIn: '15m' }
-   );
-   
-   const refreshToken = this.jwtService.sign(
-      { sub: userId } as any,
-      { secret: process.env.JWT_REFRESH_SECRET ?? 'default_refresh_secret', expiresIn: '7d' }
-   );
+    await this.refreshTokenRepo.delete({ user: { id: userId } });
 
-   const hashedToken = await bcrypt.hash(refreshToken, 10);
+    const accessToken = this.jwtService.sign(
+      { sub: userId, email: user.email ?? '', name: user.fullname ?? '' },
+      {
+        secret: process.env.JWT_SECRET ?? 'default_jwt_secret',
+        expiresIn: '15m',
+      },
+    );
 
-   await this.refreshTokenRepo.save(
-    this.refreshTokenRepo.create({
-      user,
-      token_hash: hashedToken,
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    })
-  );
+    const refreshToken = this.jwtService.sign({ sub: userId } as any, {
+      secret: process.env.JWT_REFRESH_SECRET ?? 'default_refresh_secret',
+      expiresIn: '7d',
+    });
 
-   return { accessToken, refreshToken };
- }
+    const hashedToken = await bcrypt.hash(refreshToken, 10);
 
- async validateUser(email: string, password: string) {
-   const user = await this.userService.findByEmail(email);
+    await this.refreshTokenRepo.save(
+      this.refreshTokenRepo.create({
+        user,
+        token_hash: hashedToken,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      }),
+    );
 
-   if (!user) {
-     throw new NotFoundException('User not found');
-   }
+    return { accessToken, refreshToken };
+  }
 
-   const isValid = await bcrypt.compare(password, (user as any).password);
+  async validateUser(email: string, password: string) {
+    const user = await this.userService.findByEmail(email);
 
-   if (!isValid) {
-     throw new UnauthorizedException('Invalid credentials');
-   }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-   const { password: _pwd, ...userWithoutPassword } = user as any;
-   return userWithoutPassword;
- }
+    const isValid = await bcrypt.compare(password, (user as any).password);
 
- async refresh(refreshToken: string) {
-  if (!refreshToken) throw new ForbiddenException('No refresh token');
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
-  const payload = this.jwtService.verify(refreshToken, {
-    secret: process.env.JWT_REFRESH_SECRET,
-  });
+    const { password: _pwd, ...userWithoutPassword } = user as any;
+    return userWithoutPassword;
+  }
 
-  const saved = await this.refreshTokenRepo.findOne({
-    where: { user: { id: payload.sub } },
-  });
+  async refresh(refreshToken: string) {
+    if (!refreshToken) throw new ForbiddenException('No refresh token');
 
-  if (!saved || !saved.token_hash) throw new ForbiddenException();
+    const payload = this.jwtService.verify(refreshToken, {
+      secret: process.env.JWT_REFRESH_SECRET,
+    });
 
-  const isValid = await bcrypt.compare(refreshToken, saved.token_hash);
-  if (!isValid) throw new ForbiddenException();
+    const saved = await this.refreshTokenRepo.findOne({
+      where: { user: { id: payload.sub } },
+    });
 
-  return this.login(payload.sub);
-}
+    if (!saved || !saved.token_hash) throw new ForbiddenException();
 
+    const isValid = await bcrypt.compare(refreshToken, saved.token_hash);
+    if (!isValid) throw new ForbiddenException();
 
- async logout(userId: number){
-   await this.refreshTokenRepo.delete({user: {id:userId}})
- }
+    return this.login(payload.sub);
+  }
+
+  async logout(userId: number) {
+    await this.refreshTokenRepo.delete({ user: { id: userId } });
+  }
 }

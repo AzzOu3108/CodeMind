@@ -25,11 +25,11 @@ export class YoutubeService {
   async searchVideo(
     chapterTitle: string,
     courseTitle: string,
-    difficulty: string
+    difficulty: string,
   ): Promise<YoutubeVideo | null> {
     try {
       const query = encodeURIComponent(
-        `${chapterTitle} ${courseTitle} ${difficulty} tutorial`
+        `${chapterTitle} ${courseTitle} ${difficulty} tutorial`,
       );
       const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=1&key=${this.apiKey}`;
 
@@ -49,9 +49,8 @@ export class YoutubeService {
         videoId,
         title,
         thumbnail,
-        url: `https://www.youtube.com/watch?v=${videoId}`
+        url: `https://www.youtube.com/watch?v=${videoId}`,
       };
-
     } catch (error) {
       this.logger.error('YouTube search failed', error);
       return null; // never crash course generation because of a missing video

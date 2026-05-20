@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,47 +14,46 @@ import { Course } from '../course/entities/course.entity';
 @Injectable()
 export class UserService {
   constructor(
-  @InjectRepository(User)
-  private readonly userRepo: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
 
-  @InjectRepository(Course)
-  private readonly courseRepo: Repository<Course>,
-  ){}
+    @InjectRepository(Course)
+    private readonly courseRepo: Repository<Course>,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
-  const { fullname, email, password } = createUserDto;
+    const { fullname, email, password } = createUserDto;
 
-  const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email.toLowerCase();
 
-  const existingEmail = await this.userRepo.findOne({
-    where: { email: normalizedEmail },
-  });
+    const existingEmail = await this.userRepo.findOne({
+      where: { email: normalizedEmail },
+    });
 
-  if (existingEmail) {
-    throw new BadRequestException('Email already taken');
+    if (existingEmail) {
+      throw new BadRequestException('Email already taken');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = this.userRepo.create({
+      ...createUserDto,
+      email: normalizedEmail,
+      password: hashedPassword,
+    });
+
+    const savedUser = await this.userRepo.save(user);
+
+    const { password: _pwd, ...userWithoutPassword } = savedUser;
+    return userWithoutPassword as Omit<User, 'password'>;
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = this.userRepo.create({
-    ...createUserDto,
-    email: normalizedEmail,
-    password: hashedPassword,
-  });
-
-  const savedUser = await this.userRepo.save(user);
-
-  const { password: _pwd, ...userWithoutPassword } = savedUser;
-  return userWithoutPassword as Omit<User, 'password'>;
-}
-
-
-  async findAll(){
+  async findAll() {
     return this.userRepo.find();
   }
 
   async findRawById(id: number) {
-  return this.userRepo.findOne({ where: { id } });
+    return this.userRepo.findOne({ where: { id } });
   }
 
   async findByEmail(email: string) {
@@ -62,70 +65,70 @@ export class UserService {
       .getOne();
   }
 
-  async findOne(id: number){
-  const user = await this.userRepo.findOne({ where: { id } });
+  async findOne(id: number) {
+    const user = await this.userRepo.findOne({ where: { id } });
 
-  if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException('User not found');
 
-  const {password, ...userWithoutPassword} = user
-  return userWithoutPassword;
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-  const user = await this.userRepo.findOne({ where: { id } });
+    const user = await this.userRepo.findOne({ where: { id } });
 
-  if (!user) {
-    throw new NotFoundException('User not found');
-  }
-
-  const { password, confirmPassword, email, ...rest } = updateUserDto;
-
-  if(email){
-    const normalizedEmail = email.toLowerCase()
-
-    const existingUser = await this.userRepo.findOne({
-      where: {email: normalizedEmail}
-    })
-
-    if(existingUser && existingUser.id !== id){
-      throw new BadRequestException('Email already taken')
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
 
-    user.email = normalizedEmail
-  }
+    const { password, confirmPassword, email, ...rest } = updateUserDto;
 
-  if(password || confirmPassword){
-    if(!password || !confirmPassword){
-      throw new BadRequestException('Both password fields are required')
+    if (email) {
+      const normalizedEmail = email.toLowerCase();
+
+      const existingUser = await this.userRepo.findOne({
+        where: { email: normalizedEmail },
+      });
+
+      if (existingUser && existingUser.id !== id) {
+        throw new BadRequestException('Email already taken');
+      }
+
+      user.email = normalizedEmail;
     }
-    if(password !== confirmPassword){
-      throw new BadRequestException('Passwords do not match');
+
+    if (password || confirmPassword) {
+      if (!password || !confirmPassword) {
+        throw new BadRequestException('Both password fields are required');
+      }
+      if (password !== confirmPassword) {
+        throw new BadRequestException('Passwords do not match');
+      }
+      user.password = await bcrypt.hash(password, 10);
     }
-    user.password = await bcrypt.hash(password, 10)
+
+    Object.assign(user, rest);
+
+    const updated = await this.userRepo.save(user);
+
+    const { password: _pwd, ...userWithoutPassword } = updated;
+    return userWithoutPassword as Omit<User, 'password'>;
   }
 
-  Object.assign(user, rest);
+  async remove(id: number) {
+    const user = await this.userRepo
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.id = :id', { id })
+      .getOne();
 
-  const updated = await this.userRepo.save(user);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-  const { password: _pwd, ...userWithoutPassword } = updated;
-  return userWithoutPassword as Omit<User, 'password'>;
-}
+    await this.courseRepo.delete({ user: { id } });
+    await this.userRepo.remove(user);
 
-  async remove(id:number){
-  const user = await this.userRepo
-    .createQueryBuilder('user')
-    .addSelect('user.password')
-    .where('user.id = :id', { id })
-    .getOne();
-
-  if (!user) {
-    throw new NotFoundException('User not found');
-  }
-
-  await this.courseRepo.delete({ user: { id } });
-  await this.userRepo.remove(user);
-
-  return { message: 'User deleted successfully' };
+    return { message: 'User deleted successfully' };
   }
 }
