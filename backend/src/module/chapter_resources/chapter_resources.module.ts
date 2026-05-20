@@ -6,6 +6,6 @@ import { Resources } from '../resources/entities/resources.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ChapiterResource, Chapiter, Resources])],
-  exports: [TypeOrmModule]
+  exports: [TypeOrmModule],
 })
 export class ChapiterResourcesModule {}

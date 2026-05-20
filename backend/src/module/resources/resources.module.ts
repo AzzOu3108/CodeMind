@@ -5,6 +5,10 @@ import { ChapiterModule } from 'src/module/chapter/chapter.module';
 import { ChapiterResourcesModule } from 'src/module/chapter_resources/chapter_resources.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Resources]), ChapiterModule, ChapiterResourcesModule],
+  imports: [
+    TypeOrmModule.forFeature([Resources]),
+    ChapiterModule,
+    ChapiterResourcesModule,
+  ],
 })
 export class ResourcesModule {}

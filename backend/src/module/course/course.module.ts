@@ -6,14 +6,15 @@ import { Course } from './entities/course.entity';
 import { User } from 'src/module/user/entities/user.entity';
 import { Chapiter } from 'src/module/chapter/entities/chapter.entity';
 import { CourseChapiter } from '../course_chapter/entities/course_chapiter.entity';
+import { Lesson } from 'src/module/lesson/entities/lesson.entity';
 import { GeminiModule } from 'src/gemini/gemini.module';
 import { YoutubeModule } from 'src/youtube/youtube.module';
 
-
 @Module({
-  imports: [TypeOrmModule.forFeature([Course, User, Chapiter, CourseChapiter]),
-  GeminiModule,
-  YoutubeModule
+  imports: [
+    TypeOrmModule.forFeature([Course, User, Chapiter, CourseChapiter, Lesson]),
+    GeminiModule,
+    YoutubeModule,
   ],
   controllers: [CourseController],
   providers: [CourseService],

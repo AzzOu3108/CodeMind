@@ -1,5 +1,13 @@
-import { Chapiter } from "src/module/chapter/entities/chapter.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Chapiter } from 'src/module/chapter/entities/chapter.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('lesson')
 export class Lesson {
@@ -11,6 +19,12 @@ export class Lesson {
 
   @Column({ type: 'text' })
   content: string;
+
+  @Column({ type: 'int' })
+  order: number;
+
+  @Column({ type: 'int' })
+  duration_minutes: number;
 
   @Column({ type: 'varchar', nullable: true })
   video_id: string;
@@ -25,22 +39,24 @@ export class Lesson {
   video_url: string;
 
   @CreateDateColumn({
-        name: 'created_at',
-        type: 'timestamp',
-        default: () => 'now()',
-    })
+    name: 'created_at',
+    type: 'timestamp',
+    default: () => 'now()',
+  })
   created_at: Date;
 
   @UpdateDateColumn({
-        name: 'updated_at',
-        type: 'timestamp',
-        default: () => 'now()',
-        onUpdate: 'CURRENT_TIMESTAMP',
-    })
+    name: 'updated_at',
+    type: 'timestamp',
+    default: () => 'now()',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
   updated_at: Date;
 
   // relation
-  @ManyToOne(() => Chapiter, (chapiter) => chapiter.lessons, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Chapiter, (chapiter) => chapiter.lessons, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'chapiter_id' })
   chapiter: Chapiter;
 }

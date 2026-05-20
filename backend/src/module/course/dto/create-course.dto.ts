@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsString, MaxLength, IsInt, IsBoolean, IsEnum } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  IsInt,
+  IsBoolean,
+  IsEnum,
+} from 'class-validator';
 
 export enum Difficulty {
   Beginner = 'beginner',
@@ -26,5 +33,4 @@ export class CreateCourseDto {
 
   @IsEnum(Difficulty)
   difficulty: Difficulty;
-
 }

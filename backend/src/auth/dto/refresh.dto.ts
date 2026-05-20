@@ -1,16 +1,15 @@
-import { IsDate, IsInt, IsNotEmpty, IsString } from "class-validator";
+import { IsDate, IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class RefreshDto {
+  @IsInt()
+  @IsNotEmpty()
+  user_id: number;
 
-    @IsInt()
-    @IsNotEmpty()
-    user_id: number;
+  @IsString()
+  @IsNotEmpty()
+  token_hash: string;
 
-    @IsString()
-    @IsNotEmpty()
-    token_hash: string;
-
-    @IsDate()
-    @IsNotEmpty()
-    expires_at: Date;
+  @IsDate()
+  @IsNotEmpty()
+  expires_at: Date;
 }

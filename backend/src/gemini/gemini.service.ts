@@ -27,7 +27,6 @@ export class GeminiService {
     try {
       const result = await model.generateContent(prompt);
       return result.response.text();
-
     } catch (error: any) {
       const isRateLimited =
         error?.status === 429 ||
@@ -38,14 +37,19 @@ export class GeminiService {
         // Daily quota exhausted (limit: 0) — retrying is pointless
         const isDailyQuotaExhausted = error?.message?.includes('limit: 0');
         if (isDailyQuotaExhausted) {
-          this.logger.error('Daily Gemini quota exhausted. Try again tomorrow or use a new API key.');
-          throw new Error('AI service daily limit reached. Please try again later.');
+          this.logger.error(
+            'Daily Gemini quota exhausted. Try again tomorrow or use a new API key.',
+          );
+          throw new Error(
+            'AI service daily limit reached. Please try again later.',
+          );
         }
 
         // Per-minute rate limit — retry makes sense
         if (retries > 0) {
           const retryInfo = error?.errorDetails?.find(
-            (d: any) => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo'
+            (d: any) =>
+              d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo',
           );
           const match = retryInfo?.retryDelay?.match(/(\d+)s/);
           const parsedDelay = match ? parseInt(match[1]) * 1000 : null;
@@ -53,15 +57,21 @@ export class GeminiService {
           // retryDelay of 0s means hard limit — don't retry
           if (parsedDelay === 0) {
             this.logger.error('Gemini quota fully exhausted.');
-            throw new Error('AI service daily limit reached. Please try again later.');
+            throw new Error(
+              'AI service daily limit reached. Please try again later.',
+            );
           }
 
           const isProd = this.config.get('NODE_ENV') === 'production';
-          const fallbackDelay = isProd ? 35000 : 10000 * Math.pow(2, 3 - retries);
+          const fallbackDelay = isProd
+            ? 35000
+            : 10000 * Math.pow(2, 3 - retries);
           const waitTime = parsedDelay ?? fallbackDelay;
 
-          this.logger.warn(`Rate limited, retrying in ${waitTime / 1000}s... (${retries} left)`);
-          await new Promise(res => setTimeout(res, waitTime));
+          this.logger.warn(
+            `Rate limited, retrying in ${waitTime / 1000}s... (${retries} left)`,
+          );
+          await new Promise((res) => setTimeout(res, waitTime));
           return this.generateText(prompt, retries - 1);
         }
       }
@@ -76,7 +86,7 @@ export class GeminiService {
     courseTitle: string,
     chaptersCount: number,
     difficulty: string,
-    description?: string
+    description?: string,
   ): Promise<string[]> {
     const prompt = `
       You are a course creator. Generate ${chaptersCount} chapter titles
@@ -96,9 +106,15 @@ export class GeminiService {
         return JSON.parse(cleaned);
       }
     } catch (error: any) {
-      this.logger.error('Chapter title generation failed', error?.message || error);
+      this.logger.error(
+        'Chapter title generation failed',
+        error?.message || error,
+      );
       this.logger.warn('Using fallback chapter titles.');
-      return Array.from({ length: chaptersCount }, (_, i) => `Chapter ${i + 1}`);
+      return Array.from(
+        { length: chaptersCount },
+        (_, i) => `Chapter ${i + 1}`,
+      );
     }
   }
 
@@ -106,7 +122,7 @@ export class GeminiService {
   async generateChapterDescription(
     courseTitle: string,
     chapterTitle: string,
-    difficulty: string
+    difficulty: string,
   ): Promise<string> {
     const prompt = `
       Write a single short sentence (max 15 words) describing what a learner will learn
@@ -118,7 +134,10 @@ export class GeminiService {
     try {
       return await this.generateText(prompt);
     } catch (error: any) {
-      this.logger.error('Chapter description generation failed', error?.message || error);
+      this.logger.error(
+        'Chapter description generation failed',
+        error?.message || error,
+      );
       return `Learn the key concepts of ${chapterTitle}.`;
     }
   }
@@ -128,7 +147,7 @@ export class GeminiService {
     courseTitle: string,
     chapterTitle: string,
     difficulty: string,
-    lessonsCount: number = 3
+    lessonsCount: number = 3,
   ): Promise<GeneratedLesson[]> {
     const prompt = `
       You are a course creator. Generate exactly ${lessonsCount} lessons for a chapter titled "${chapterTitle}"
