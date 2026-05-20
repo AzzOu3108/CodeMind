@@ -13,6 +13,7 @@ import { ResourcesModule } from './module/resources/resources.module';
 import { AuthModule } from './auth/auth.module';
 import { GeminiModule } from './gemini/gemini.module';
 import { YoutubeModule } from './youtube/youtube.module';
+import { LessonModule } from './module/lesson/lesson.module';
 
 @Module({
   imports: [
@@ -38,7 +39,7 @@ import { YoutubeModule } from './youtube/youtube.module';
       },
       inject: [ConfigService],
     }),
-    UserModule, CourseModule, ChapiterModule, CourseChapiterModule, ProgressModule, ResourcesModule, AuthModule, GeminiModule, YoutubeModule],
+    UserModule, CourseModule, ChapiterModule, CourseChapiterModule, ProgressModule, ResourcesModule, AuthModule, GeminiModule, YoutubeModule, LessonModule],
   controllers: [AppController],
   providers: [AppService],
 })

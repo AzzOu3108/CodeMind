@@ -6,8 +6,8 @@ export class RefreshToken {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({type: 'varchar'})
-    token_hash: string;
+    @Column({ type: 'varchar', nullable: true })
+    token_hash: string | null;
 
     @CreateDateColumn({
         name: 'created_at',

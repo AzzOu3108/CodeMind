@@ -85,11 +85,10 @@ export class CourseService {
     const chapterTitle = chapiterTitles[i];
 
     // generate content
-    const content = await this.geminiService.generateChapterContent(
+    const content = await this.geminiService.generateChapterDescription(
       dto.title,
       chapterTitle,
-      dto.difficulty,
-      i
+      dto.difficulty
     );
 
     // save chapiter

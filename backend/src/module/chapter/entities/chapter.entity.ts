@@ -1,5 +1,6 @@
 import { ChapiterResource } from "src/module/chapter_resources/entities/chapter_resource.entity";
 import { CourseChapiter } from "src/module/course_chapter/entities/course_chapiter.entity";
+import { Lesson } from "src/module/lesson/entities/lesson.entity";
 import { Progress } from "src/module/progress/entities/progress.entity";
 import { Resources } from "src/module/resources/entities/resources.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm";
@@ -38,6 +39,9 @@ export class Chapiter {
 
     @OneToMany(() => ChapiterResource, (cr) => cr.chapiter)
     chapiterResources: ChapiterResource[];
+
+    @OneToMany(() => Lesson, (lesson) => lesson.chapiter, { cascade: true })
+    lessons: Lesson[];
 
     @ManyToMany(() => Resources, (r) => r.chapiters)
     @JoinTable({

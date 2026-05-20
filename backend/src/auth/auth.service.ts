@@ -76,7 +76,7 @@ export class AuthService {
     where: { user: { id: payload.sub } },
   });
 
-  if (!saved) throw new ForbiddenException();
+  if (!saved || !saved.token_hash) throw new ForbiddenException();
 
   const isValid = await bcrypt.compare(refreshToken, saved.token_hash);
   if (!isValid) throw new ForbiddenException();

@@ -6,9 +6,10 @@ import { Chapiter } from './entities/chapter.entity';
 import { ChapiterResourcesModule } from 'src/module/chapter_resources/chapter_resources.module';
 import { CourseModule } from '../course/course.module';
 import { CourseChapiter } from '../course_chapter/entities/course_chapiter.entity';
+import { Lesson } from '../lesson/entities/lesson.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Chapiter, CourseChapiter]),CourseModule , ChapiterResourcesModule],
+  imports:[TypeOrmModule.forFeature([Chapiter, CourseChapiter, Lesson]),CourseModule , ChapiterResourcesModule],
   controllers: [ChapterController],
   providers: [ChapterService],
   exports: [ChapterService]

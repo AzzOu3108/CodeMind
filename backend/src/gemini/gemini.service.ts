@@ -2,6 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+export interface GeneratedLesson {
+  title: string;
+  content: string;
+  duration_minutes: number;
+}
+
 @Injectable()
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
@@ -65,18 +71,20 @@ export class GeminiService {
     }
   }
 
+  // generates the chapter titles for the course
   async generateChapterTitles(
-    title: string,
+    courseTitle: string,
     chaptersCount: number,
     difficulty: string,
     description?: string
   ): Promise<string[]> {
     const prompt = `
       You are a course creator. Generate ${chaptersCount} chapter titles
-      for a ${difficulty} level course on "${title}".
+      for a ${difficulty} level course on "${courseTitle}".
       ${description ? `Context: ${description}` : ''}
+      Each chapter title should represent a major topic of the course.
       Return ONLY a valid JSON array of strings. No explanation, no markdown, no backticks.
-      Example: ["Chapter 1 title", "Chapter 2 title"]
+      Example: ["Introduction to Python", "Variables and Data Types"]
     `;
 
     try {
@@ -88,37 +96,79 @@ export class GeminiService {
         return JSON.parse(cleaned);
       }
     } catch (error: any) {
-      this.logger.error('Gemini chapter title generation failed', error?.message || error);
+      this.logger.error('Chapter title generation failed', error?.message || error);
       this.logger.warn('Using fallback chapter titles.');
       return Array.from({ length: chaptersCount }, (_, i) => `Chapter ${i + 1}`);
     }
   }
 
-  async generateChapterContent(
+  // generates a short description for a chapter (shown under chapter title in UI)
+  async generateChapterDescription(
     courseTitle: string,
     chapterTitle: string,
-    difficulty: string,
-    chapterIndex: number
+    difficulty: string
   ): Promise<string> {
     const prompt = `
-      You are a course creator. Write educational content for chapter ${chapterIndex + 1}
-      titled "${chapterTitle}" in a ${difficulty} level course about "${courseTitle}".
-      
-      Structure:
-      - Introduction (2-3 sentences)
-      - Key Concepts (3-5 points)
-      - Practical Example
-      - Summary (1-2 sentences)
-
-      Be clear, concise and educational.
+      Write a single short sentence (max 15 words) describing what a learner will learn
+      in a chapter titled "${chapterTitle}" in a ${difficulty} course about "${courseTitle}".
+      Return plain text only. No quotes, no markdown.
+      Example: "Get started with Python and set up your development environment."
     `;
 
     try {
       return await this.generateText(prompt);
     } catch (error: any) {
-      this.logger.error('Gemini chapter content generation failed', error?.message || error);
-      this.logger.warn('Using fallback chapter content.');
-      return `This is placeholder content for chapiter ${chapterIndex + 1} titled "${chapterTitle}" in a ${difficulty} course about "${courseTitle}".`;
+      this.logger.error('Chapter description generation failed', error?.message || error);
+      return `Learn the key concepts of ${chapterTitle}.`;
+    }
+  }
+
+  // generates lessons for a chapter — each lesson is a specific subtopic with content
+  async generateLessons(
+    courseTitle: string,
+    chapterTitle: string,
+    difficulty: string,
+    lessonsCount: number = 3
+  ): Promise<GeneratedLesson[]> {
+    const prompt = `
+      You are a course creator. Generate exactly ${lessonsCount} lessons for a chapter titled "${chapterTitle}"
+      in a ${difficulty} level course about "${courseTitle}".
+
+      CRITICAL rules for lesson titles:
+      - Each title must be a SPECIFIC concept, not generic
+      - Good: "What is Python and why use it", "Installing Python on Windows and Mac", "Writing your first Hello World program"
+      - Bad: "Introduction", "Lesson 1", "Overview", "Getting Started"
+      - Titles must be specific enough that searching them on YouTube returns ONE relevant video
+
+      Return ONLY a valid JSON array. No markdown, no backticks, no explanation.
+      Each item must have exactly these fields:
+      - title: specific and searchable lesson title (string)
+      - content: full educational content covering introduction, key concepts, practical example, and summary (string)
+      - duration_minutes: realistic estimated time to complete this lesson as a number between 5 and 15 (number)
+
+      Example:
+      [
+        { "title": "What is Python and why use it", "content": "Python is a high-level...", "duration_minutes": 5 },
+        { "title": "Installing Python on Windows and Mac", "content": "To install Python...", "duration_minutes": 10 }
+      ]
+    `;
+
+    try {
+      const raw = await this.generateText(prompt);
+      try {
+        return JSON.parse(raw);
+      } catch {
+        const cleaned = raw.replace(/```json|```/g, '').trim();
+        return JSON.parse(cleaned);
+      }
+    } catch (error: any) {
+      this.logger.error('Lesson generation failed', error?.message || error);
+      this.logger.warn('Using fallback lessons.');
+      return Array.from({ length: lessonsCount }, (_, i) => ({
+        title: `Lesson ${i + 1}`,
+        content: `Content for lesson ${i + 1} of ${chapterTitle}.`,
+        duration_minutes: 10,
+      }));
     }
   }
 }
