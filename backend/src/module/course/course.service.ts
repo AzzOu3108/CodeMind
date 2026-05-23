@@ -6,6 +6,7 @@ import { User } from 'src/module/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Chapiter } from 'src/module/chapter/entities/chapter.entity';
 import { CourseChapiter } from '../course_chapter/entities/course_chapiter.entity';
+import { Lesson } from 'src/module/lesson/entities/lesson.entity';
 import { GeminiService } from 'src/gemini/gemini.service';
 import { YoutubeService, YoutubeVideo } from 'src/youtube/youtube.service';
 
@@ -20,6 +21,8 @@ export class CourseService {
   private chapiterRepo: Repository<Chapiter>,
   @InjectRepository(CourseChapiter)
   private courseChapiterRepo: Repository<CourseChapiter>,
+  @InjectRepository(Lesson)
+  private lessonRepo: Repository<Lesson>,
 
   private geminiService: GeminiService,
   private youtubeService: YoutubeService,
@@ -63,13 +66,6 @@ export class CourseService {
     return this.formatCourseResponse(full);
   }
 
-  const chapiterTitles = await this.geminiService.generateChapterTitles(
-    dto.title,
-    dto.chapiter_count,
-    dto.difficulty,
-    dto.description,
-  );
-
   const course = this.courseRepo.create({
     title: dto.title.trim(),
     description: dto.description?.trim() ?? '',
@@ -81,41 +77,62 @@ export class CourseService {
   });
   const savedCourse = await this.courseRepo.save(course);
 
-  for (let i = 0; i < chapiterTitles.length; i++) {
-    const chapterTitle = chapiterTitles[i];
+  const courseStructure = await this.geminiService.generateCourseStructure(
+    dto.title,
+    dto.chapiter_count,
+    dto.difficulty,
+    dto.description,
+  );
 
-    // generate content
-    const content = await this.geminiService.generateChapterDescription(
-      dto.title,
-      chapterTitle,
-      dto.difficulty
-    );
+  const seenVideoIds = new Set<string>();
+
+  for (let i = 0; i < courseStructure.length; i++) {
+    const chapterData = courseStructure[i];
 
     // save chapiter
-    const chapiter = this.chapiterRepo.create({ title: chapterTitle, content });
+    const chapiter = this.chapiterRepo.create({
+      title: chapterData.title,
+      content: chapterData.content,
+    });
     const savedChapiter = await this.chapiterRepo.save(chapiter);
-
-    // fetch video if requested
-    let videoData: YoutubeVideo | null = null;
-    if (dto.include_video) {
-      videoData = await this.youtubeService.searchVideo(
-        chapterTitle,
-        dto.title,
-        dto.difficulty
-      );
-    }
 
     // save join table row
     const courseChapiter = this.courseChapiterRepo.create({
       course_id: savedCourse.id,
       chapiter_id: savedChapiter.id,
       order: i + 1,
-      video_id: videoData?.videoId ?? null,
-      video_title: videoData?.title ?? null,
-      video_thumbnail: videoData?.thumbnail ?? null,
-      video_url: videoData?.url ?? null,
     } as Partial<CourseChapiter>);
     await this.courseChapiterRepo.save(courseChapiter);
+
+    // save lessons (variable count decided by Gemini) with optional YouTube video
+    for (const lessonData of chapterData.lessons) {
+      let lessonVideo: YoutubeVideo | null = null;
+      if (dto.include_video) {
+        lessonVideo = await this.youtubeService.searchVideo(
+          lessonData.title,
+          dto.title,
+          dto.difficulty,
+          dto.description
+        );
+        if (lessonVideo && seenVideoIds.has(lessonVideo.videoId)) {
+          lessonVideo = null;
+        }
+        if (lessonVideo) {
+          seenVideoIds.add(lessonVideo.videoId);
+        }
+      }
+
+      const lesson = this.lessonRepo.create({
+        title: lessonData.title,
+        content: lessonData.content,
+        video_id: lessonVideo?.videoId ?? null,
+        video_title: lessonVideo?.title ?? null,
+        video_thumbnail: lessonVideo?.thumbnail ?? null,
+        video_url: lessonVideo?.url ?? null,
+      } as Partial<Lesson>);
+      lesson.chapiter = savedChapiter;
+      await this.lessonRepo.save(lesson);
+    }
   }
 
   // return full formatted response
@@ -137,12 +154,17 @@ private formatCourseResponse(course: Course) {
       order: cc.order,
       title: cc.chapiter.title,
       content: cc.chapiter.content,
-      video: cc.video_id ? {
-        videoId: cc.video_id,
-        title: cc.video_title,
-        thumbnail: cc.video_thumbnail,
-        url: cc.video_url,
-      } : null,
+      lessons: (cc.chapiter.lessons || []).map(lesson => ({
+        id: lesson.id,
+        title: lesson.title,
+        content: lesson.content,
+        video: lesson.video_id ? {
+          videoId: lesson.video_id,
+          title: lesson.video_title,
+          thumbnail: lesson.video_thumbnail,
+          url: lesson.video_url,
+        } : null,
+      })),
     })),
   };
 }
@@ -163,7 +185,9 @@ private formatCourseResponse(course: Course) {
       where: {id},
       relations: {
         courseChapiter:{
-          chapiter: true,
+          chapiter: {
+            lessons: true,
+          },
         }
       },
       order:{

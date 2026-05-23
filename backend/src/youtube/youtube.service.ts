@@ -23,15 +23,29 @@ export class YoutubeService {
   }
 
   async searchVideo(
-    chapterTitle: string,
+    searchTerm: string,
     courseTitle: string,
-    difficulty: string
+    difficulty: string,
+    courseDescription?: string
   ): Promise<YoutubeVideo | null> {
     try {
+      const difficultyQueries: Record<string, string> = {
+        beginner: 'beginner tutorial for beginners step by step',
+        intermediate: 'intermediate tutorial learn',
+        advanced: 'advanced expert level in-depth deep dive',
+      };
+
+      const difficultyDuration: Record<string, string> = {
+        beginner: 'medium',
+        intermediate: 'medium',
+        advanced: 'long',
+      };
+
       const query = encodeURIComponent(
-        `${chapterTitle} ${courseTitle} ${difficulty} tutorial`
+        `${courseTitle} ${searchTerm} ${difficultyQueries[difficulty] || difficulty}`
       );
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=1&key=${this.apiKey}`;
+      const duration = difficultyDuration[difficulty] || 'any';
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=1&videoDuration=${duration}&videoDefinition=high&key=${this.apiKey}`;
 
       const res = await fetch(url);
       if (!res.ok) throw new Error(`YouTube error: ${res.status}`);
@@ -52,9 +66,10 @@ export class YoutubeService {
         url: `https://www.youtube.com/watch?v=${videoId}`
       };
 
-    } catch (error) {
-      this.logger.error('YouTube search failed', error);
-      return null; // never crash course generation because of a missing video
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`YouTube search failed: ${message}`);
+      return null;
     }
   }
 }
