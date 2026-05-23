@@ -23,15 +23,28 @@ export class YoutubeService {
   }
 
   async searchVideo(
-    chapterTitle: string,
+    searchTerm: string,
     courseTitle: string,
     difficulty: string,
   ): Promise<YoutubeVideo | null> {
     try {
+      const difficultyQueries: Record<string, string> = {
+        beginner: 'beginner tutorial for beginners step by step',
+        intermediate: 'intermediate tutorial learn',
+        advanced: 'advanced expert level in-depth deep dive',
+      };
+
+      const difficultyDuration: Record<string, string> = {
+        beginner: 'medium',
+        intermediate: 'medium',
+        advanced: 'long',
+      };
+
       const query = encodeURIComponent(
         `${chapterTitle} ${courseTitle} ${difficulty} tutorial`,
       );
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=1&key=${this.apiKey}`;
+      const duration = difficultyDuration[difficulty] || 'any';
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=1&videoDuration=${duration}&videoDefinition=high&key=${this.apiKey}`;
 
       const res = await fetch(url);
       if (!res.ok) throw new Error(`YouTube error: ${res.status}`);

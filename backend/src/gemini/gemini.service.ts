@@ -5,7 +5,12 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 export interface GeneratedLesson {
   title: string;
   content: string;
-  duration_minutes: number;
+}
+
+export interface GeneratedChapter {
+  title: string;
+  content: string;
+  lessons: { title: string; content: string }[];
 }
 
 @Injectable()
@@ -76,7 +81,7 @@ export class GeminiService {
         }
       }
 
-      this.logger.error('Gemini call failed', error?.message || error);
+      this.logger.error(`Gemini call failed: status=${error?.status}, message=${error?.message}, details=${JSON.stringify(error?.errorDetails || error?.details || 'none')}`);
       throw error;
     }
   }
@@ -88,11 +93,18 @@ export class GeminiService {
     difficulty: string,
     description?: string,
   ): Promise<string[]> {
+    const chapterTitleStyle: Record<string, string> = {
+      beginner: 'Use accessible language. Focus on fundamentals and getting-started topics.',
+      intermediate: 'Use practical terminology. Focus on real-world patterns and best practices.',
+      advanced: 'Use technical terminology. Focus on advanced concepts, internals, and expert-level topics.',
+    };
+
     const prompt = `
       You are a course creator. Generate ${chaptersCount} chapter titles
       for a ${difficulty} level course on "${courseTitle}".
       ${description ? `Context: ${description}` : ''}
-      Each chapter title should represent a major topic of the course.
+      Each chapter title must be appropriate for ${difficulty} level learners.
+      ${chapterTitleStyle[difficulty] || ''}
       Return ONLY a valid JSON array of strings. No explanation, no markdown, no backticks.
       Example: ["Introduction to Python", "Variables and Data Types"]
     `;
@@ -124,11 +136,18 @@ export class GeminiService {
     chapterTitle: string,
     difficulty: string,
   ): Promise<string> {
+    const descriptionStyle: Record<string, string> = {
+      beginner: 'Use accessible language.',
+      intermediate: 'Use moderate technical depth. Assume learners know the basics.',
+      advanced: 'Use technical depth.',
+    };
+
     const prompt = `
       Write a single short sentence (max 15 words) describing what a learner will learn
       in a chapter titled "${chapterTitle}" in a ${difficulty} course about "${courseTitle}".
+      The tone and vocabulary must match ${difficulty} level.
+      ${descriptionStyle[difficulty] || ''}
       Return plain text only. No quotes, no markdown.
-      Example: "Get started with Python and set up your development environment."
     `;
 
     try {
@@ -149,26 +168,40 @@ export class GeminiService {
     difficulty: string,
     lessonsCount: number = 3,
   ): Promise<GeneratedLesson[]> {
+    const difficultyInstructions: Record<string, string> = {
+      beginner:
+        'Use simple welcoming language. Titles should start with "What is...", "How to...", "Understanding...". '
+        + 'Focus on foundational concepts and basic syntax. Avoid jargon.',
+      intermediate:
+        'Introduce moderate technical depth. Titles should reference real-world patterns, '
+        + 'best practices, and common tools. Assume learners know the basics.',
+      advanced:
+        'Use precise technical terminology. Titles should reference specific advanced concepts '
+        + '(e.g. "metaclasses", "descriptors", "GIL internals", "decorator factories"). '
+        + 'Focus on internals, optimization, and expert-level patterns.',
+    };
+
+    const instruction = difficultyInstructions[difficulty] || difficultyInstructions.intermediate;
+
     const prompt = `
       You are a course creator. Generate exactly ${lessonsCount} lessons for a chapter titled "${chapterTitle}"
       in a ${difficulty} level course about "${courseTitle}".
 
       CRITICAL rules for lesson titles:
-      - Each title must be a SPECIFIC concept, not generic
-      - Good: "What is Python and why use it", "Installing Python on Windows and Mac", "Writing your first Hello World program"
+      - Each title must be a SPECIFIC and SEARCHABLE concept, not generic
+      - The titles MUST reflect the ${difficulty} level of the course — do NOT mix levels
+      - ${instruction}
       - Bad: "Introduction", "Lesson 1", "Overview", "Getting Started"
-      - Titles must be specific enough that searching them on YouTube returns ONE relevant video
+      - Titles must be specific enough that searching them on YouTube returns ONE relevant video at the ${difficulty} level
 
       Return ONLY a valid JSON array. No markdown, no backticks, no explanation.
       Each item must have exactly these fields:
-      - title: specific and searchable lesson title (string)
+      - title: specific, searchable, difficulty-appropriate lesson title (string)
       - content: full educational content covering introduction, key concepts, practical example, and summary (string)
-      - duration_minutes: realistic estimated time to complete this lesson as a number between 5 and 15 (number)
 
-      Example:
+      Example format (the titles below are just format references, NOT appropriate for ${difficulty} level):
       [
-        { "title": "What is Python and why use it", "content": "Python is a high-level...", "duration_minutes": 5 },
-        { "title": "Installing Python on Windows and Mac", "content": "To install Python...", "duration_minutes": 10 }
+        { "title": "Lesson concept title here", "content": "Full lesson content here..." }
       ]
     `;
 
@@ -183,10 +216,16 @@ export class GeminiService {
     } catch (error: any) {
       this.logger.error('Lesson generation failed', error?.message || error);
       this.logger.warn('Using fallback lessons.');
-      return Array.from({ length: lessonsCount }, (_, i) => ({
-        title: `Lesson ${i + 1}`,
-        content: `Content for lesson ${i + 1} of ${chapterTitle}.`,
-        duration_minutes: 10,
+      const fallbackLessonTemplates = [
+        { title: `Understanding ${chapterTitle}` },
+        { title: `Working with ${chapterTitle}` },
+        { title: `${chapterTitle} Best Practices` },
+        { title: `Advanced ${chapterTitle} Patterns` },
+        { title: `${chapterTitle} in ${courseTitle}` },
+      ];
+      return fallbackLessonTemplates.slice(0, lessonsCount).map(l => ({
+        ...l,
+        content: `Comprehensive guide to ${l.title}. Covers key concepts, practical examples, and best practices for ${courseTitle}.`,
       }));
     }
   }
