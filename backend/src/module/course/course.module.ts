@@ -10,11 +10,11 @@ import { Lesson } from 'src/module/lesson/entities/lesson.entity';
 import { GeminiModule } from 'src/gemini/gemini.module';
 import { YoutubeModule } from 'src/youtube/youtube.module';
 
-
 @Module({
-  imports: [TypeOrmModule.forFeature([Course, User, Chapiter, CourseChapiter, Lesson]),
-  GeminiModule,
-  YoutubeModule
+  imports: [
+    TypeOrmModule.forFeature([Course, User, Chapiter, CourseChapiter, Lesson]),
+    GeminiModule,
+    YoutubeModule,
   ],
   controllers: [CourseController],
   providers: [CourseService],

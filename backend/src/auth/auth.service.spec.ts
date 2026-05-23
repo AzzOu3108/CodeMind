@@ -11,14 +11,22 @@ describe('AuthService', () => {
   beforeEach(async () => {
     const mockUserService = { findRawById: jest.fn(), findByEmail: jest.fn() };
     const mockJwtService = { sign: jest.fn().mockReturnValue('token') };
-    const mockRefreshRepo = { create: jest.fn(), save: jest.fn(), findOne: jest.fn(), delete: jest.fn() };
+    const mockRefreshRepo = {
+      create: jest.fn(),
+      save: jest.fn(),
+      findOne: jest.fn(),
+      delete: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: UserService, useValue: mockUserService },
         { provide: JwtService, useValue: mockJwtService },
-        { provide: getRepositoryToken(RefreshToken), useValue: mockRefreshRepo },
+        {
+          provide: getRepositoryToken(RefreshToken),
+          useValue: mockRefreshRepo,
+        },
       ],
     }).compile();
 

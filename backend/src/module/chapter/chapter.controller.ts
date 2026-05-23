@@ -3,7 +3,6 @@ import { CreateChapterDto } from './dto/create-chapter.dto';
 import { ChapterService } from './chapter.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 
-
 @UseGuards(JwtAuthGuard)
 @Controller('chapiter')
 export class ChapterController {
@@ -12,14 +11,13 @@ export class ChapterController {
   @Post(':courseId')
   create(
     @Param('courseId') courseId: number,
-    @Body() createChapterDtos: CreateChapterDto[]
+    @Body() createChapterDtos: CreateChapterDto[],
   ) {
-    return this.chapterService.create(courseId ,createChapterDtos);
+    return this.chapterService.create(courseId, createChapterDtos);
   }
 
   @Get()
   findAll() {
     return this.chapterService.findAll();
   }
-
 }

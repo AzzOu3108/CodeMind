@@ -3,6 +3,6 @@ import { YoutubeService } from './youtube.service';
 
 @Module({
   providers: [YoutubeService],
-  exports:[YoutubeService]
+  exports: [YoutubeService],
 })
 export class YoutubeModule {}

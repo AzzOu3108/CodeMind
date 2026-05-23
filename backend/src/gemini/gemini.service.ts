@@ -32,7 +32,6 @@ export class GeminiService {
     try {
       const result = await model.generateContent(prompt);
       return result.response.text();
-
     } catch (error: any) {
       const isRateLimited =
         error?.status === 429 ||
@@ -43,14 +42,19 @@ export class GeminiService {
         // Daily quota exhausted (limit: 0) — retrying is pointless
         const isDailyQuotaExhausted = error?.message?.includes('limit: 0');
         if (isDailyQuotaExhausted) {
-          this.logger.error('Daily Gemini quota exhausted. Try again tomorrow or use a new API key.');
-          throw new Error('AI service daily limit reached. Please try again later.');
+          this.logger.error(
+            'Daily Gemini quota exhausted. Try again tomorrow or use a new API key.',
+          );
+          throw new Error(
+            'AI service daily limit reached. Please try again later.',
+          );
         }
 
         // Per-minute rate limit — retry makes sense
         if (retries > 0) {
           const retryInfo = error?.errorDetails?.find(
-            (d: any) => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo'
+            (d: any) =>
+              d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo',
           );
           const match = retryInfo?.retryDelay?.match(/(\d+)s/);
           const parsedDelay = match ? parseInt(match[1]) * 1000 : null;
@@ -58,15 +62,21 @@ export class GeminiService {
           // retryDelay of 0s means hard limit — don't retry
           if (parsedDelay === 0) {
             this.logger.error('Gemini quota fully exhausted.');
-            throw new Error('AI service daily limit reached. Please try again later.');
+            throw new Error(
+              'AI service daily limit reached. Please try again later.',
+            );
           }
 
           const isProd = this.config.get('NODE_ENV') === 'production';
-          const fallbackDelay = isProd ? 35000 : 10000 * Math.pow(2, 3 - retries);
+          const fallbackDelay = isProd
+            ? 35000
+            : 10000 * Math.pow(2, 3 - retries);
           const waitTime = parsedDelay ?? fallbackDelay;
 
-          this.logger.warn(`Rate limited, retrying in ${waitTime / 1000}s... (${retries} left)`);
-          await new Promise(res => setTimeout(res, waitTime));
+          this.logger.warn(
+            `Rate limited, retrying in ${waitTime / 1000}s... (${retries} left)`,
+          );
+          await new Promise((res) => setTimeout(res, waitTime));
           return this.generateText(prompt, retries - 1);
         }
       }
@@ -81,7 +91,7 @@ export class GeminiService {
     courseTitle: string,
     chaptersCount: number,
     difficulty: string,
-    description?: string
+    description?: string,
   ): Promise<string[]> {
     const chapterTitleStyle: Record<string, string> = {
       beginner: 'Use accessible language. Focus on fundamentals and getting-started topics.',
@@ -108,20 +118,15 @@ export class GeminiService {
         return JSON.parse(cleaned);
       }
     } catch (error: any) {
-      this.logger.error('Chapter title generation failed', error?.message || error);
+      this.logger.error(
+        'Chapter title generation failed',
+        error?.message || error,
+      );
       this.logger.warn('Using fallback chapter titles.');
-      const context = courseTitle;
-      const fallbackTitles = [
-        `Introduction to ${context}`,
-        `Core Concepts of ${context}`,
-        `Building with ${context}`,
-        `Advanced ${context} Techniques`,
-        `${context} Best Practices`,
-        `${context} Real-World Applications`,
-        `${context} Performance & Optimization`,
-        `${context} Deep Dive`,
-      ];
-      return fallbackTitles.slice(0, chaptersCount);
+      return Array.from(
+        { length: chaptersCount },
+        (_, i) => `Chapter ${i + 1}`,
+      );
     }
   }
 
@@ -129,7 +134,7 @@ export class GeminiService {
   async generateChapterDescription(
     courseTitle: string,
     chapterTitle: string,
-    difficulty: string
+    difficulty: string,
   ): Promise<string> {
     const descriptionStyle: Record<string, string> = {
       beginner: 'Use accessible language.',
@@ -148,8 +153,11 @@ export class GeminiService {
     try {
       return await this.generateText(prompt);
     } catch (error: any) {
-      this.logger.error('Chapter description generation failed', error?.message || error);
-      return `Explore ${chapterTitle} in the context of ${courseTitle}.`;
+      this.logger.error(
+        'Chapter description generation failed',
+        error?.message || error,
+      );
+      return `Learn the key concepts of ${chapterTitle}.`;
     }
   }
 
@@ -158,7 +166,7 @@ export class GeminiService {
     courseTitle: string,
     chapterTitle: string,
     difficulty: string,
-    lessonsCount: number = 3
+    lessonsCount: number = 3,
   ): Promise<GeneratedLesson[]> {
     const difficultyInstructions: Record<string, string> = {
       beginner:
@@ -219,133 +227,6 @@ export class GeminiService {
         ...l,
         content: `Comprehensive guide to ${l.title}. Covers key concepts, practical examples, and best practices for ${courseTitle}.`,
       }));
-    }
-  }
-
-  // generates the full course structure — chapters with variable-length lessons (Gemini decides)
-  async generateCourseStructure(
-    courseTitle: string,
-    chaptersCount: number,
-    difficulty: string,
-    description?: string
-  ): Promise<GeneratedChapter[]> {
-    const difficultyInstructions: Record<string, string> = {
-      beginner:
-        'Use accessible language. Focus on fundamentals and getting-started topics. '
-        + 'Lessons should start with "What is...", "How to...", "Understanding...".',
-      intermediate:
-        'Use practical terminology. Focus on real-world patterns and best practices. '
-        + 'Assume learners know the basics. Use moderate technical depth.',
-      advanced:
-        'Use precise technical terminology. Focus on advanced concepts, internals, and expert-level topics. '
-        + 'Use technical depth.',
-    };
-
-    const prompt = `
-      You are a course creator. Generate a ${chaptersCount}-chapter ${difficulty} level course on "${courseTitle}".
-      ${description ? `Course context: ${description}` : ''}
-
-      REQUIREMENTS:
-      - Each chapter title must be specific and appropriate for ${difficulty} level
-      - Each chapter needs a short description (max 15 words) of what the learner will learn
-      - Each chapter MUST have between 2 and 6 lessons — NOT a fixed number
-      - Complex/foundational chapters should have more lessons (4-6)
-      - Simpler/narrower chapters should have fewer lessons (2-3)
-      - Vary lesson count based on topic depth and breadth
-      - Each lesson title must be a specific, searchable concept
-      - Each lesson must have full educational content (intro, key concepts, example, summary)
-      - ${difficultyInstructions[difficulty] || ''}
-
-      Return ONLY a valid JSON array. No markdown, no backticks, no explanation.
-      Each object:
-      - title: chapter title (string)
-      - content: chapter description (string, max 15 words)
-      - lessons: array of { title: string, content: string }
-
-      Example:
-      [
-        {
-          "title": "Microservices Architecture Fundamentals",
-          "content": "Learn core microservices principles and NestJS setup.",
-          "lessons": [
-            { "title": "What are Microservices?", "content": "Full content here..." }
-          ]
-        }
-      ]
-    `;
-
-    try {
-      const raw = await this.generateText(prompt);
-      try {
-        return JSON.parse(raw);
-      } catch {
-        const cleaned = raw.replace(/```json|```/g, '').trim();
-        return JSON.parse(cleaned);
-      }
-    } catch (error: any) {
-      this.logger.error('Course structure generation failed', error?.message || error);
-      this.logger.warn('Using fallback course structure.');
-
-      const displayTitle = courseTitle
-        .split(' ')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
-
-      const chapterThemes = [
-        { title: `Introduction to ${displayTitle}`, content: `Get started with ${displayTitle} fundamentals.` },
-        { title: `${displayTitle} Core Architecture`, content: `Understand the key architectural patterns.` },
-        { title: `Building with ${displayTitle}`, content: `Learn practical implementation strategies.` },
-        { title: `Advanced ${displayTitle} Techniques`, content: `Master advanced topics and optimizations.` },
-        { title: `${displayTitle} Best Practices`, content: `Production-ready patterns and conventions.` },
-        { title: `${displayTitle} Real-World Applications`, content: `Apply concepts in real-world scenarios.` },
-        { title: `${displayTitle} Performance & Optimization`, content: `Optimize performance and scalability.` },
-        { title: `${displayTitle} Deep Dive`, content: `In-depth exploration of internals.` },
-      ];
-
-      const lessonSets = [
-        [
-          `What is ${displayTitle}?`,
-          `${displayTitle} Architecture Overview`,
-          `Key Concepts in ${displayTitle}`,
-        ],
-        [
-          `Setting Up ${displayTitle}`,
-          `${displayTitle} Configuration`,
-          `${displayTitle} Development Workflow`,
-        ],
-        [
-          `${displayTitle} Design Patterns`,
-          `Implementing ${displayTitle}`,
-          `${displayTitle} Code Examples`,
-        ],
-        [
-          `Advanced ${displayTitle} Topics`,
-          `${displayTitle} Performance Tuning`,
-          `${displayTitle} Security Considerations`,
-        ],
-        [
-          `${displayTitle} Testing Strategies`,
-          `${displayTitle} Deployment Guide`,
-          `${displayTitle} Monitoring & Logging`,
-        ],
-        [
-          `${displayTitle} in Production`,
-          `${displayTitle} Troubleshooting`,
-          `${displayTitle} Scaling Strategies`,
-        ],
-      ];
-
-      return chapterThemes.slice(0, chaptersCount).map((chapter, i) => {
-        const set = lessonSets[i % lessonSets.length];
-        return {
-          title: chapter.title,
-          content: chapter.content,
-          lessons: set.map(title => ({
-            title,
-            content: `Comprehensive guide to ${title}. Covers key concepts, practical examples, and best practices for ${displayTitle}.`,
-          })),
-        };
-      });
     }
   }
 }

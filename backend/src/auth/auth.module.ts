@@ -9,13 +9,13 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
-  imports:[
+  imports: [
     PassportModule,
     JwtModule.registerAsync({
-      useFactory: () =>({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '15m' },
-      })
+      useFactory: () => ({
+        secret: process.env.JWT_SECRET,
+        signOptions: { expiresIn: '15m' },
+      }),
     }),
     TypeOrmModule.forFeature([RefreshToken]),
     UserModule,

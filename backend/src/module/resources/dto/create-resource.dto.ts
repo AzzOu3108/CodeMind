@@ -1,16 +1,16 @@
-import { IsEnum, IsInt, IsNotEmpty, IsString, IsUrl } from "class-validator";
+import { IsEnum, IsInt, IsNotEmpty, IsString, IsUrl } from 'class-validator';
 
 export enum ResourcesType {
-    Video = 'video',
-    // you can add other types later
+  Video = 'video',
+  // you can add other types later
 }
 
 export class CreateResourceDto {
-    @IsNotEmpty()
-    @IsEnum(ResourcesType)
-    type: ResourcesType;
+  @IsNotEmpty()
+  @IsEnum(ResourcesType)
+  type: ResourcesType;
 
-    @IsNotEmpty()
-    @IsUrl()
-    url: string;
+  @IsNotEmpty()
+  @IsUrl()
+  url: string;
 }

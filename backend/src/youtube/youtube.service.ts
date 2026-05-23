@@ -26,7 +26,6 @@ export class YoutubeService {
     searchTerm: string,
     courseTitle: string,
     difficulty: string,
-    courseDescription?: string
   ): Promise<YoutubeVideo | null> {
     try {
       const difficultyQueries: Record<string, string> = {
@@ -42,7 +41,7 @@ export class YoutubeService {
       };
 
       const query = encodeURIComponent(
-        `${courseTitle} ${searchTerm} ${difficultyQueries[difficulty] || difficulty}`
+        `${chapterTitle} ${courseTitle} ${difficulty} tutorial`,
       );
       const duration = difficultyDuration[difficulty] || 'any';
       const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=1&videoDuration=${duration}&videoDefinition=high&key=${this.apiKey}`;
@@ -63,13 +62,11 @@ export class YoutubeService {
         videoId,
         title,
         thumbnail,
-        url: `https://www.youtube.com/watch?v=${videoId}`
+        url: `https://www.youtube.com/watch?v=${videoId}`,
       };
-
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`YouTube search failed: ${message}`);
-      return null;
+    } catch (error) {
+      this.logger.error('YouTube search failed', error);
+      return null; // never crash course generation because of a missing video
     }
   }
 }
