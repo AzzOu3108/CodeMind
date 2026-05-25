@@ -1,4 +1,4 @@
-import { CourseChapiter } from 'src/module/course_chapter/entities/course_chapiter.entity';
+import { Chapiter } from 'src/module/chapter/entities/chapter.entity';
 import { User } from 'src/module/user/entities/user.entity';
 import {
   Column,
@@ -58,6 +58,6 @@ export class Course {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToMany(() => CourseChapiter, (cc) => cc.course, { onDelete: 'CASCADE' })
-  courseChapiter: CourseChapiter[];
+  @OneToMany(() => Chapiter, (chapiter) => chapiter.course, { onDelete: 'CASCADE' })
+  chapiters: Chapiter[];
 }

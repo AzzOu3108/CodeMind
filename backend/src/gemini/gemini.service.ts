@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 export interface GeneratedLesson {
   title: string;
   content: string;
+  duration_minutes?: number;
 }
 
 export interface GeneratedChapter {
