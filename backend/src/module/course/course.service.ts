@@ -9,7 +9,6 @@ import { Course } from './entities/course.entity';
 import { User } from 'src/module/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Chapiter } from 'src/module/chapter/entities/chapter.entity';
-import { CourseChapiter } from '../course_chapter/entities/course_chapiter.entity';
 import { Lesson } from 'src/module/lesson/entities/lesson.entity';
 import { GeminiService } from 'src/gemini/gemini.service';
 import { YoutubeService } from 'src/youtube/youtube.service';
@@ -23,8 +22,6 @@ export class CourseService {
     private userRepo: Repository<User>,
     @InjectRepository(Chapiter)
     private chapiterRepo: Repository<Chapiter>,
-    @InjectRepository(CourseChapiter)
-    private courseChapiterRepo: Repository<CourseChapiter>,
     @InjectRepository(Lesson)
     private lessonRepo: Repository<Lesson>,
 
@@ -101,16 +98,10 @@ export class CourseService {
       const chapiter = this.chapiterRepo.create({
         title: chapterTitle,
         content,
+        order: i + 1,
+        course: savedCourse,
       });
       const savedChapiter = await this.chapiterRepo.save(chapiter);
-
-      // save join table row (no chapter-level video anymore)
-      const courseChapiter = this.courseChapiterRepo.create({
-        course_id: savedCourse.id,
-        chapiter_id: savedChapiter.id,
-        order: i + 1,
-      } as Partial<CourseChapiter>);
-      await this.courseChapiterRepo.save(courseChapiter);
 
       // generate and save lessons
       const generatedLessons = await this.geminiService.generateLessons(
@@ -134,6 +125,7 @@ export class CourseService {
             gl.title,
             dto.title,
             dto.difficulty,
+            chapterTitle,
           );
         }
 
@@ -141,7 +133,7 @@ export class CourseService {
           title: gl.title,
           content: gl.content,
           order: j + 1,
-          duration_minutes: gl.duration_minutes,
+          duration_minutes: gl.duration_minutes ?? 0,
           video_id: lessonVideoData?.videoId ?? null,
           video_title: lessonVideoData?.title ?? null,
           video_thumbnail: lessonVideoData?.thumbnail ?? null,
@@ -158,40 +150,35 @@ export class CourseService {
   }
 
   private formatCourseResponse(course: Course) {
-    const chapters = course.courseChapiter.map((cc) => {
-      const lessons = (cc.chapiter.lessons || [])
-        .sort((a, b) => a.order - b.order)
-        .map((lesson) => ({
-          id: lesson.id,
-          order: lesson.order,
-          title: lesson.title,
-          content: lesson.content,
-          duration_minutes: lesson.duration_minutes,
-          video: lesson.video_id
-            ? {
-                videoId: lesson.video_id,
-                title: lesson.video_title,
-                thumbnail: lesson.video_thumbnail,
-                url: lesson.video_url,
-              }
-            : null,
-        }));
+    const chapters = (course.chapiters || [])
+      .sort((a, b) => a.order - b.order)
+      .map((chapiter) => {
+        const lessons = (chapiter.lessons || [])
+          .sort((a, b) => a.order - b.order)
+          .map((lesson) => ({
+            id: lesson.id,
+            order: lesson.order,
+            title: lesson.title,
+            content: lesson.content,
+            video: lesson.video_id
+              ? {
+                  videoId: lesson.video_id,
+                  title: lesson.video_title,
+                  thumbnail: lesson.video_thumbnail,
+                  url: lesson.video_url,
+                }
+              : null,
+          }));
 
-      const total_duration = lessons.reduce(
-        (sum, l) => sum + (l.duration_minutes || 0),
-        0,
-      );
-
-      return {
-        id: cc.chapiter.id,
-        order: cc.order,
-        title: cc.chapiter.title,
-        description: cc.chapiter.content,
-        lessons_count: lessons.length,
-        total_duration,
-        lessons,
-      };
-    });
+        return {
+          id: chapiter.id,
+          order: chapiter.order,
+          title: chapiter.title,
+          description: chapiter.content,
+          lessons_count: lessons.length,
+          lessons,
+        };
+      });
 
     return {
       id: course.id,
@@ -209,10 +196,8 @@ export class CourseService {
     const courses = await this.courseRepo.find({
       order: { created_at: 'DESC' },
       relations: {
-        courseChapiter: {
-          chapiter: {
-            lessons: true,
-          },
+        chapiters: {
+          lessons: true,
         },
       },
     });
@@ -223,14 +208,12 @@ export class CourseService {
     const course = await this.courseRepo.findOne({
       where: { id },
       relations: {
-        courseChapiter: {
-          chapiter: {
-            lessons: true,
-          },
+        chapiters: {
+          lessons: true,
         },
       },
       order: {
-        courseChapiter: {
+        chapiters: {
           order: 'ASC',
         },
       },
@@ -245,16 +228,10 @@ export class CourseService {
   async remove(courseId: number): Promise<void> {
     const course = await this.courseRepo.findOne({
       where: { id: courseId },
-      relations: { courseChapiter: { chapiter: true } },
     });
 
     if (!course) {
       throw new NotFoundException('Course not found');
-    }
-
-    if (course.courseChapiter && course.courseChapiter.length > 0) {
-      const chapiterIds = course.courseChapiter.map((cc) => cc.chapiter.id);
-      await this.chapiterRepo.delete(chapiterIds);
     }
 
     await this.courseRepo.remove(course);

@@ -20,11 +20,8 @@ export class Lesson {
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 })
   order: number;
-
-  @Column({ type: 'int' })
-  duration_minutes: number;
 
   @Column({ type: 'varchar', nullable: true })
   video_id: string;

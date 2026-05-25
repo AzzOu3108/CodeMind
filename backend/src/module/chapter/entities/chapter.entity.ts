@@ -1,5 +1,5 @@
 import { ChapiterResource } from 'src/module/chapter_resources/entities/chapter_resource.entity';
-import { CourseChapiter } from 'src/module/course_chapter/entities/course_chapiter.entity';
+import { Course } from 'src/module/course/entities/course.entity';
 import { Lesson } from 'src/module/lesson/entities/lesson.entity';
 import { Progress } from 'src/module/progress/entities/progress.entity';
 import { Resources } from 'src/module/resources/entities/resources.entity';
@@ -7,6 +7,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -40,8 +42,12 @@ export class Chapiter {
   })
   updated_at: Date;
 
-  @OneToMany(() => CourseChapiter, (cc) => cc.chapiter, { onDelete: 'CASCADE' })
-  courseChapiter: CourseChapiter[];
+  @Column({ type: 'int', default: 0 })
+  order: number;
+
+  @ManyToOne(() => Course, (course) => course.chapiters, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'course_id' })
+  course: Course;
 
   @OneToMany(() => Progress, (p) => p.chapiter)
   progress: Progress[];

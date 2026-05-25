@@ -26,6 +26,7 @@ export class YoutubeService {
     searchTerm: string,
     courseTitle: string,
     difficulty: string,
+    chapterTitle?: string,
   ): Promise<YoutubeVideo | null> {
     try {
       const difficultyQueries: Record<string, string> = {
@@ -41,7 +42,7 @@ export class YoutubeService {
       };
 
       const query = encodeURIComponent(
-        `${chapterTitle} ${courseTitle} ${difficulty} tutorial`,
+        `${chapterTitle ? `${chapterTitle} ` : ''}${searchTerm} ${courseTitle} ${difficultyQueries[difficulty] || difficulty} tutorial`,
       );
       const duration = difficultyDuration[difficulty] || 'any';
       const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=1&videoDuration=${duration}&videoDefinition=high&key=${this.apiKey}`;
