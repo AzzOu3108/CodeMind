@@ -10,7 +10,7 @@ import { User } from 'src/module/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Chapiter } from 'src/module/chapter/entities/chapter.entity';
 import { Lesson } from 'src/module/lesson/entities/lesson.entity';
-import { GeminiService } from 'src/gemini/gemini.service';
+import { AiService } from 'src/ai/ai.service';
 import { YoutubeService } from 'src/youtube/youtube.service';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class CourseService {
     @InjectRepository(Lesson)
     private lessonRepo: Repository<Lesson>,
 
-    private geminiService: GeminiService,
+    private aiService: AiService,
     private youtubeService: YoutubeService,
   ) {}
 
@@ -68,7 +68,7 @@ export class CourseService {
       return this.findOne(cached.id);
     }
 
-    const chapiterTitles = await this.geminiService.generateChapterTitles(
+    const chapiterTitles = await this.aiService.generateChapterTitles(
       dto.title,
       dto.chapiter_count,
       dto.difficulty,
@@ -86,10 +86,13 @@ export class CourseService {
     });
     const savedCourse = await this.courseRepo.save(course);
 
+    const allLessonTitles: string[] = [];
+    const allVideoIds: string[] = [];
+
     for (let i = 0; i < chapiterTitles.length; i++) {
       const chapterTitle = chapiterTitles[i];
 
-      const content = await this.geminiService.generateChapterDescription(
+      const content = await this.aiService.generateChapterDescription(
         dto.title,
         chapterTitle,
         dto.difficulty,
@@ -103,16 +106,17 @@ export class CourseService {
       });
       const savedChapiter = await this.chapiterRepo.save(chapiter);
 
-      // generate and save lessons
-      const generatedLessons = await this.geminiService.generateLessons(
+      const generatedLessons = await this.aiService.generateLessons(
         dto.title,
         chapterTitle,
         dto.difficulty,
         3,
+        allLessonTitles,
       );
 
       for (let j = 0; j < generatedLessons.length; j++) {
         const gl = generatedLessons[j];
+        allLessonTitles.push(gl.title);
 
         let lessonVideoData: {
           videoId: string;
@@ -126,7 +130,11 @@ export class CourseService {
             dto.title,
             dto.difficulty,
             chapterTitle,
+            allVideoIds,
           );
+        }
+        if (lessonVideoData) {
+          allVideoIds.push(lessonVideoData.videoId);
         }
 
         const lesson = this.lessonRepo.create({

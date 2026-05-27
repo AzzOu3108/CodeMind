@@ -6,13 +6,13 @@ import { Course } from './entities/course.entity';
 import { User } from 'src/module/user/entities/user.entity';
 import { Chapiter } from 'src/module/chapter/entities/chapter.entity';
 import { Lesson } from 'src/module/lesson/entities/lesson.entity';
-import { GeminiModule } from 'src/gemini/gemini.module';
+import { AiModule } from 'src/ai/ai.module';
 import { YoutubeModule } from 'src/youtube/youtube.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Course, User, Chapiter, Lesson]),
-    GeminiModule,
+    AiModule,
     YoutubeModule,
   ],
   controllers: [CourseController],

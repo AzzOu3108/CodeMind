@@ -10,7 +10,7 @@ import { ProgressModule } from './module/progress/progress.module';
 import { ChapiterModule } from './module/chapter/chapter.module';
 import { ResourcesModule } from './module/resources/resources.module';
 import { AuthModule } from './auth/auth.module';
-import { GeminiModule } from './gemini/gemini.module';
+import { AiModule } from './ai/ai.module';
 import { YoutubeModule } from './youtube/youtube.module';
 import { LessonModule } from './module/lesson/lesson.module';
 
@@ -44,7 +44,7 @@ import { LessonModule } from './module/lesson/lesson.module';
     ProgressModule,
     ResourcesModule,
     AuthModule,
-    GeminiModule,
+    AiModule,
     YoutubeModule,
     LessonModule,
   ],
