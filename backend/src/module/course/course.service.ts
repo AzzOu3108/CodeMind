@@ -61,7 +61,8 @@ export class CourseService {
     const cached = existingCourse.find(
       (c) =>
         c.difficulty === dto.difficulty &&
-        c.chapiter_count === dto.chapiter_count,
+        c.chapiter_count === dto.chapiter_count &&
+        c.tech_stack === dto.tech_stack,
     );
 
     if (cached) {
@@ -73,6 +74,7 @@ export class CourseService {
       dto.chapiter_count,
       dto.difficulty,
       dto.description,
+      dto.tech_stack,
     );
 
     const course = this.courseRepo.create({
@@ -81,6 +83,7 @@ export class CourseService {
       chapiter_count: dto.chapiter_count,
       include_video: dto.include_video,
       difficulty: dto.difficulty,
+      tech_stack: dto.tech_stack,
       progress: 0,
       user,
     });
@@ -96,6 +99,7 @@ export class CourseService {
         dto.title,
         chapterTitle,
         dto.difficulty,
+        dto.tech_stack,
       );
 
       const chapiter = this.chapiterRepo.create({
@@ -112,6 +116,7 @@ export class CourseService {
         dto.difficulty,
         3,
         allLessonTitles,
+        dto.tech_stack,
       );
 
       for (let j = 0; j < generatedLessons.length; j++) {
@@ -141,7 +146,6 @@ export class CourseService {
           title: gl.title,
           content: gl.content,
           order: j + 1,
-          duration_minutes: gl.duration_minutes ?? 0,
           video_id: lessonVideoData?.videoId ?? null,
           video_title: lessonVideoData?.title ?? null,
           video_thumbnail: lessonVideoData?.thumbnail ?? null,
@@ -193,6 +197,7 @@ export class CourseService {
       title: course.title,
       description: course.description,
       difficulty: course.difficulty,
+      tech_stack: course.tech_stack,
       chapiter_count: course.chapiter_count,
       include_video: course.include_video,
       created_at: course.created_at,

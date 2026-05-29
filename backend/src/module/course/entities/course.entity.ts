@@ -31,6 +31,9 @@ export class Course {
   @Column({ type: 'boolean', default: false })
   include_video: boolean;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  tech_stack: string;
+
   @Column({
     type: 'enum',
     enum: ['beginner', 'intermediate', 'advanced'],

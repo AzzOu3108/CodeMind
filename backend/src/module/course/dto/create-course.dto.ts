@@ -5,7 +5,10 @@ import {
   IsInt,
   IsBoolean,
   IsEnum,
+  IsIn,
 } from 'class-validator';
+
+import { TECH_STACKS } from '../tech-stacks';
 
 export enum Difficulty {
   Beginner = 'beginner',
@@ -33,4 +36,9 @@ export class CreateCourseDto {
 
   @IsEnum(Difficulty)
   difficulty: Difficulty;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(TECH_STACKS.map(s => s.value))
+  tech_stack: string;
 }

@@ -35,7 +35,7 @@ export class AiService {
           {
             role: 'system',
             content:
-              'You are a course creator. Return only valid JSON or plain text as instructed. No markdown, no backticks, no extra commentary.',
+              'You are a course creator. Return only valid JSON or plain text as instructed. When using markdown, only use fenced code blocks with language tags (```language) and inline code. No extra commentary.',
           },
           { role: 'user', content: prompt },
         ],
@@ -75,6 +75,7 @@ export class AiService {
     chaptersCount: number,
     difficulty: string,
     description?: string,
+    techStack?: string,
   ): Promise<string[]> {
     const chapterTitleStyle: Record<string, string> = {
       beginner:
@@ -89,6 +90,7 @@ export class AiService {
       You are a course creator. Generate ${chaptersCount} chapter titles
       for a ${difficulty} level course on "${courseTitle}".
       ${description ? `Context: ${description}` : ''}
+      ${techStack ? `The course uses ${techStack}. Include this technology in chapter titles when relevant (e.g. "JWT Authentication with Spring Boot Security").` : ''}
       Each chapter title must be appropriate for ${difficulty} level learners.
       ${chapterTitleStyle[difficulty] || ''}
       Keep each title under 8 words. Be specific and avoid generic labels like "Introduction" or "Overview".
@@ -121,6 +123,7 @@ export class AiService {
     courseTitle: string,
     chapterTitle: string,
     difficulty: string,
+    techStack?: string,
   ): Promise<string> {
     const descriptionStyle: Record<string, string> = {
       beginner: 'Use accessible language.',
@@ -132,6 +135,7 @@ export class AiService {
     const prompt = `
       Write a single short sentence (max 15 words) describing what a learner will learn
       in a chapter titled "${chapterTitle}" in a ${difficulty} course about "${courseTitle}".
+      ${techStack ? `The course uses ${techStack}. Reference this technology in the description.` : ''}
       The tone and vocabulary must match ${difficulty} level.
       ${descriptionStyle[difficulty] || ''}
       Be specific to the chapter content — avoid generic phrases like "Learn the key concepts".
@@ -155,6 +159,7 @@ export class AiService {
     difficulty: string,
     lessonsCount: number = 3,
     existingTitles: string[] = [],
+    techStack?: string,
   ): Promise<GeneratedLesson[]> {
     const difficultyInstructions: Record<string, string> = {
       beginner:
@@ -172,37 +177,39 @@ export class AiService {
     const instruction =
       difficultyInstructions[difficulty] || difficultyInstructions.intermediate;
 
+    const codeExamples = `
+      Each lesson content must contain:
+      - Copy-paste code examples in fenced blocks with language tags
+      - CLI/terminal commands in bash blocks (e.g. npm install, pip install)
+      - Show outputs, errors, config files where relevant
+      - Official download links for any tool or package mentioned
+      - Only use official domains (github.com, npmjs.com, python.org, etc.)`;
+
+    const techStackInstruction = techStack
+      ? `\nTECHNOLOGY STACK: The course uses ${techStack}. ALL code examples, commands, installation instructions, and configuration MUST use this technology.\n- Use the appropriate language, framework, package manager, and ecosystem for ${techStack}.\n- Include framework-specific setup, patterns, and best practices.`
+      : '';
+
     const prompt = `
       You are a course creator. Generate exactly ${lessonsCount} lessons for a chapter titled "${chapterTitle}"
-      in a ${difficulty} level course about "${courseTitle}".
+      in a ${difficulty} level course about "${courseTitle}".${techStackInstruction}
 
-      CRITICAL rules for lesson titles:
-      - Each title must be a SPECIFIC and SEARCHABLE concept, not generic
-      - Keep each title under 8 words
-      - The titles MUST reflect the ${difficulty} level of the course — do NOT mix levels
-      - ${instruction}
-      - Bad: "Introduction", "Lesson 1", "Overview", "Getting Started"
-      - Titles must be specific enough that searching them on YouTube returns ONE relevant video at the ${difficulty} level
-      - NEVER reuse any of these already-used lesson titles: ${JSON.stringify(existingTitles)}
+      TITLE RULES:
+      - Specific, searchable concept under 8 words
+      - Reflect ${difficulty} level
+      ${instruction}
+      - Avoid: "Introduction", "Overview", "Getting Started"
+      - Never reuse: ${JSON.stringify(existingTitles)}
 
-      CRITICAL rules for lesson content:
-      - Vary sentence structure. Bad patterns to avoid:
-        * "In this lesson, we will..."
-        * "This lesson covers..."
-        * "By the end of this lesson..."
-        * "We will explore/learn/discuss..."
-        * "Let's consider a practical example..."
-      - Write naturally, as if explaining to a peer developer over a whiteboard
-      - Use active voice and direct statements instead of "will" future tense
+      CONTENT RULES:
+      - Self-contained — learn by reading only, no external searches
+      - Natural peer-to-peer tone, active voice, no "In this lesson"
+      ${codeExamples}
+      - Start with motivation, use markdown headings (##), bullet steps, end with key takeaways
+      - Escape all " inside content as \\", use \\n for newlines
 
-      Return ONLY a valid JSON array. No markdown, no backticks, no explanation.
-      Each item must have exactly these fields:
-      - title: specific, searchable, difficulty-appropriate lesson title (string, under 8 words)
-      - content: full educational content covering introduction, key concepts, practical example, and summary (string)
-
-      Example format (the titles below are just format references, NOT appropriate for ${difficulty} level):
+      Return ONLY valid JSON array. Format:
       [
-        { "title": "Lesson concept title here", "content": "Full lesson content here..." }
+        { "title": "Title here", "content": "## Section\\n\\nExplanation.\\n\\n\`\`\`lang\\ncode\\n\`\`\`" }
       ]
     `;
 
@@ -212,21 +219,49 @@ export class AiService {
         return JSON.parse(raw);
       } catch {
         const cleaned = raw.replace(/```json|```/g, '').trim();
-        return JSON.parse(cleaned);
+        try {
+          return JSON.parse(cleaned);
+        } catch {
+          // 1. Remove trailing commas before ] or }
+          const noTrailing = cleaned.replace(/,\s*([}\]])/g, '$1');
+          try {
+            return JSON.parse(noTrailing);
+          } catch {
+            // 2. Char-by-char: fix newlines + unescaped quotes inside strings
+            let sanitized = '';
+            let inStr = false;
+            let esc = false;
+            for (const ch of noTrailing) {
+              if (esc) { sanitized += ch; esc = false; continue; }
+              if (ch === '\\') { sanitized += ch; esc = true; continue; }
+              if (ch === '"') { inStr = !inStr; sanitized += ch; continue; }
+              if (inStr && ch === '\n') { sanitized += '\\n'; continue; }
+              sanitized += ch;
+            }
+            return JSON.parse(sanitized);
+          }
+        }
       }
     } catch (error: any) {
       this.logger.error('Lesson generation failed', error?.message || error);
       this.logger.warn('Using fallback lessons.');
+      const tech = techStack || 'the chosen technology';
+      const lang = tech === 'django' || tech === 'flask' || tech === 'fastapi' ? 'python'
+        : tech === 'spring-boot' ? 'java'
+        : tech === 'express' || tech === 'nestjs' || tech === 'nextjs' || tech === 'react' || tech === 'vue' || tech === 'angular' ? 'javascript'
+        : tech === 'go' ? 'go'
+        : tech === 'flutter' ? 'dart'
+        : 'javascript';
       const fallbackLessonTemplates = [
-        { title: `Understanding ${chapterTitle}` },
-        { title: `Working with ${chapterTitle}` },
+        { title: `Introduction to ${chapterTitle}` },
+        { title: `${chapterTitle} Core Concepts` },
+        { title: `${chapterTitle} in Practice` },
+        { title: `Advanced ${chapterTitle}` },
         { title: `${chapterTitle} Best Practices` },
-        { title: `Advanced ${chapterTitle} Patterns` },
-        { title: `${chapterTitle} in ${courseTitle}` },
       ];
       return fallbackLessonTemplates.slice(0, lessonsCount).map(l => ({
         ...l,
-        content: `Comprehensive guide to ${l.title}. Covers key concepts, practical examples, and best practices for ${courseTitle}.`,
+        content: `## ${l.title}\\n\\nThis section covers ${chapterTitle.toLowerCase()} using ${tech}.\\n\\n### Key Concepts\\n\\n- Understanding the fundamentals of ${l.title}\\n- Practical implementation with ${tech}\\n- Common patterns and best practices\\n\\n### Code Example\\n\\n\`\`\`${lang}\\n// Example: ${l.title}\\n// Implement this based on your specific requirements\\n\`\`\`\\n\\n### Summary\\n\\n${l.title} is a key topic in ${courseTitle}. Practice with ${tech} to build real-world applications.`,
       }));
     }
   }
