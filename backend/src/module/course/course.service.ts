@@ -136,6 +136,7 @@ export class CourseService {
             dto.difficulty,
             chapterTitle,
             allVideoIds,
+            dto.tech_stack,
           );
         }
         if (lessonVideoData) {

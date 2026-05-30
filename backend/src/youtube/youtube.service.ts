@@ -28,16 +28,11 @@ export class YoutubeService {
     difficulty: string,
     chapterTitle?: string,
     excludeVideoIds: string[] = [],
+    techStack?: string,
   ): Promise<YoutubeVideo | null> {
     try {
-      const difficultyQueries: Record<string, string> = {
-        beginner: 'beginner tutorial for beginners step by step',
-        intermediate: 'intermediate tutorial learn',
-        advanced: 'advanced expert level in-depth deep dive',
-      };
-
       const query = encodeURIComponent(
-        `${chapterTitle ? `${chapterTitle} ` : ''}${searchTerm} ${courseTitle} ${difficultyQueries[difficulty] || difficulty} tutorial`,
+        `${searchTerm} ${techStack || courseTitle} tutorial`,
       );
       const maxResults = Math.min(excludeVideoIds.length + 1, 10);
       const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=${maxResults}&videoDefinition=high&key=${this.apiKey}`;
@@ -73,7 +68,13 @@ export class YoutubeService {
       this.logger.warn(`No new YouTube results for query (all ${data.items.length} already used): ${query}`);
       return null;
     } catch (error) {
-      this.logger.error(`YouTube search failed: ${error?.message || error}`);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : typeof error === 'string'
+          ? error
+          : JSON.stringify(error);
+
+      this.logger.error(`YouTube search failed: ${errorMessage}`);
       return null;
     }
   }
