@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Groq } from 'groq-sdk';
+import { jsonrepair } from 'jsonrepair';
 
 export interface GeneratedLesson {
   title: string;
@@ -18,6 +19,27 @@ export interface GeneratedChapter {
 export class AiService {
   private readonly logger = new Logger(AiService.name);
   private groq: Groq;
+
+  private readonly difficultyMatrix: Record<string, { assumes: string; focus: string; code: string; skip: string }> = {
+    beginner: {
+      assumes: 'no prior knowledge of this topic',
+      focus: 'concepts, what it is, how to set it up, simple isolated examples',
+      code: 'copy-paste ready snippets, one concept at a time, minimal lines, lots of comments',
+      skip: 'nothing — explain everything from scratch',
+    },
+    intermediate: {
+      assumes: 'knows the framework basics and common patterns',
+      focus: 'real-world integration, error handling, testing, common mistakes, project structure',
+      code: 'structured project files with error handling, configuration, multiple related pieces',
+      skip: 'basic setup steps, definitions of the technology, what-is explanations',
+    },
+    advanced: {
+      assumes: 'production experience with this framework',
+      focus: 'performance optimization, security edge cases, internals, custom implementations',
+      code: 'production-grade with error boundaries, logging, validations, edge case handling',
+      skip: 'anything introductory, conceptual explanations, basic setup',
+    },
+  };
 
   constructor(private config: ConfigService) {
     const apiKey = this.config.get<string>('GROQ_API_KEY');
@@ -39,7 +61,7 @@ export class AiService {
           },
           { role: 'user', content: prompt },
         ],
-        temperature: 0.7,
+        temperature: 0.3,
         max_tokens: 4096,
       });
 
@@ -77,22 +99,18 @@ export class AiService {
     description?: string,
     techStack?: string,
   ): Promise<string[]> {
-    const chapterTitleStyle: Record<string, string> = {
-      beginner:
-        'Use accessible language. Focus on fundamentals and getting-started topics.',
-      intermediate:
-        'Use practical terminology. Focus on real-world patterns and best practices.',
-      advanced:
-        'Use technical terminology. Focus on advanced concepts, internals, and expert-level topics.',
-    };
+    const matrix = this.difficultyMatrix[difficulty] || this.difficultyMatrix.beginner;
 
     const prompt = `
       You are a course creator. Generate ${chaptersCount} chapter titles
       for a ${difficulty} level course on "${courseTitle}".
       ${description ? `Context: ${description}` : ''}
-      ${techStack ? `The course uses ${techStack}. Include this technology in chapter titles when relevant (e.g. "JWT Authentication with Spring Boot Security").` : ''}
-      Each chapter title must be appropriate for ${difficulty} level learners.
-      ${chapterTitleStyle[difficulty] || ''}
+      ${techStack ? `CRITICAL — The course uses ONLY ${techStack}. The description may mention other technologies, but you MUST IGNORE them and use ${techStack} exclusively. Include "${techStack}" in chapter titles when relevant (e.g. "JWT Authentication with Spring Boot Security").` : ''}
+      DIFFICULTY LEVEL: ${difficulty}
+      LEARNER ASSUMES: ${matrix.assumes}
+      CONTENT FOCUS: ${matrix.focus}
+      CODE EXAMPLES: ${matrix.code}
+      EXPLICITLY SKIP: ${matrix.skip}
       Keep each title under 8 words. Be specific and avoid generic labels like "Introduction" or "Overview".
       Return ONLY a valid JSON array of strings. No explanation, no markdown, no backticks.
       Example: ["Python Variables and Data Types", "NestJS Module System Deep Dive"]
@@ -100,12 +118,7 @@ export class AiService {
 
     try {
       const raw = await this.generateText(prompt);
-      try {
-        return JSON.parse(raw);
-      } catch {
-        const cleaned = raw.replace(/```json|```/g, '').trim();
-        return JSON.parse(cleaned);
-      }
+      return JSON.parse(jsonrepair(raw.replace(/```json|```/g, '').trim()));
     } catch (error: any) {
       this.logger.error(
         'Chapter title generation failed',
@@ -125,19 +138,17 @@ export class AiService {
     difficulty: string,
     techStack?: string,
   ): Promise<string> {
-    const descriptionStyle: Record<string, string> = {
-      beginner: 'Use accessible language.',
-      intermediate:
-        'Use moderate technical depth. Assume learners know the basics.',
-      advanced: 'Use technical depth.',
-    };
+    const matrix = this.difficultyMatrix[difficulty] || this.difficultyMatrix.beginner;
 
     const prompt = `
       Write a single short sentence (max 15 words) describing what a learner will learn
       in a chapter titled "${chapterTitle}" in a ${difficulty} course about "${courseTitle}".
-      ${techStack ? `The course uses ${techStack}. Reference this technology in the description.` : ''}
-      The tone and vocabulary must match ${difficulty} level.
-      ${descriptionStyle[difficulty] || ''}
+      ${techStack ? `CRITICAL — The course uses ONLY ${techStack}. Ignore any other technologies mentioned elsewhere. Reference ${techStack} in the description.` : ''}
+      DIFFICULTY LEVEL: ${difficulty}
+      LEARNER ASSUMES: ${matrix.assumes}
+      CONTENT FOCUS: ${matrix.focus}
+      CODE EXAMPLES: ${matrix.code}
+      EXPLICITLY SKIP: ${matrix.skip}
       Be specific to the chapter content — avoid generic phrases like "Learn the key concepts".
       Return plain text only. No quotes, no markdown.
     `;
@@ -161,21 +172,7 @@ export class AiService {
     existingTitles: string[] = [],
     techStack?: string,
   ): Promise<GeneratedLesson[]> {
-    const difficultyInstructions: Record<string, string> = {
-      beginner:
-        'Use simple welcoming language. Titles should start with "What is...", "How to...", "Understanding...". '
-        + 'Focus on foundational concepts and basic syntax. Avoid jargon.',
-      intermediate:
-        'Introduce moderate technical depth. Titles should reference real-world patterns, '
-        + 'best practices, and common tools. Assume learners know the basics.',
-      advanced:
-        'Use precise technical terminology. Titles should reference specific advanced concepts '
-        + '(e.g. "metaclasses", "descriptors", "GIL internals", "decorator factories"). '
-        + 'Focus on internals, optimization, and expert-level patterns.',
-    };
-
-    const instruction =
-      difficultyInstructions[difficulty] || difficultyInstructions.intermediate;
+    const matrix = this.difficultyMatrix[difficulty] || this.difficultyMatrix.intermediate;
 
     const codeExamples = `
       Each lesson content must contain:
@@ -183,20 +180,26 @@ export class AiService {
       - CLI/terminal commands in bash blocks (e.g. npm install, pip install)
       - Show outputs, errors, config files where relevant
       - Official download links for any tool or package mentioned
-      - Only use official domains (github.com, npmjs.com, python.org, etc.)`;
+      - Only use official domains (github.com, npmjs.com, python.org, etc.)
+      CRITICAL — Every code and command block MUST start with triple backticks and a language tag (e.g. \`\`\`typescript, \`\`\`bash).
+      Never write bare language names like "typescript" or "bash" alone — always wrap them in triple backticks.`;
 
     const techStackInstruction = techStack
-      ? `\nTECHNOLOGY STACK: The course uses ${techStack}. ALL code examples, commands, installation instructions, and configuration MUST use this technology.\n- Use the appropriate language, framework, package manager, and ecosystem for ${techStack}.\n- Include framework-specific setup, patterns, and best practices.`
+      ? `\nTECHNOLOGY STACK: The course uses ONLY ${techStack} — ignore any conflicting technologies mentioned in the course description. ALL code examples, commands, installation instructions, and configuration MUST use this technology.\n- Use the appropriate language, framework, package manager, and ecosystem for ${techStack}.\n- Include framework-specific setup, patterns, and best practices.`
       : '';
 
     const prompt = `
       You are a course creator. Generate exactly ${lessonsCount} lessons for a chapter titled "${chapterTitle}"
       in a ${difficulty} level course about "${courseTitle}".${techStackInstruction}
 
+      DIFFICULTY LEVEL: ${difficulty}
+      LEARNER ASSUMES: ${matrix.assumes}
+      CONTENT FOCUS: ${matrix.focus}
+      CODE EXAMPLES: ${matrix.code}
+      EXPLICITLY SKIP: ${matrix.skip}
+
       TITLE RULES:
       - Specific, searchable concept under 8 words
-      - Reflect ${difficulty} level
-      ${instruction}
       - Avoid: "Introduction", "Overview", "Getting Started"
       - Never reuse: ${JSON.stringify(existingTitles)}
 
@@ -215,33 +218,7 @@ export class AiService {
 
     try {
       const raw = await this.generateText(prompt);
-      try {
-        return JSON.parse(raw);
-      } catch {
-        const cleaned = raw.replace(/```json|```/g, '').trim();
-        try {
-          return JSON.parse(cleaned);
-        } catch {
-          // 1. Remove trailing commas before ] or }
-          const noTrailing = cleaned.replace(/,\s*([}\]])/g, '$1');
-          try {
-            return JSON.parse(noTrailing);
-          } catch {
-            // 2. Char-by-char: fix newlines + unescaped quotes inside strings
-            let sanitized = '';
-            let inStr = false;
-            let esc = false;
-            for (const ch of noTrailing) {
-              if (esc) { sanitized += ch; esc = false; continue; }
-              if (ch === '\\') { sanitized += ch; esc = true; continue; }
-              if (ch === '"') { inStr = !inStr; sanitized += ch; continue; }
-              if (inStr && ch === '\n') { sanitized += '\\n'; continue; }
-              sanitized += ch;
-            }
-            return JSON.parse(sanitized);
-          }
-        }
-      }
+      return JSON.parse(jsonrepair(raw.replace(/```json|```/g, '').trim()));
     } catch (error: any) {
       this.logger.error('Lesson generation failed', error?.message || error);
       this.logger.warn('Using fallback lessons.');
@@ -252,16 +229,34 @@ export class AiService {
         : tech === 'go' ? 'go'
         : tech === 'flutter' ? 'dart'
         : 'javascript';
+      const setupCommands: Record<string, string> = {
+        python: 'python --version\\npip --version',
+        java: 'java --version\\nmvn --version',
+        javascript: 'node --version\\nnpm --version',
+        go: 'go version',
+        dart: 'dart --version',
+      };
+
       const fallbackLessonTemplates = [
-        { title: `Introduction to ${chapterTitle}` },
-        { title: `${chapterTitle} Core Concepts` },
+        { title: `Understanding ${chapterTitle}` },
+        { title: `Working with ${chapterTitle}` },
         { title: `${chapterTitle} in Practice` },
         { title: `Advanced ${chapterTitle}` },
         { title: `${chapterTitle} Best Practices` },
       ];
-      return fallbackLessonTemplates.slice(0, lessonsCount).map(l => ({
+      return fallbackLessonTemplates.slice(0, lessonsCount).map((l, i) => ({
         ...l,
-        content: `## ${l.title}\\n\\nThis section covers ${chapterTitle.toLowerCase()} using ${tech}.\\n\\n### Key Concepts\\n\\n- Understanding the fundamentals of ${l.title}\\n- Practical implementation with ${tech}\\n- Common patterns and best practices\\n\\n### Code Example\\n\\n\`\`\`${lang}\\n// Example: ${l.title}\\n// Implement this based on your specific requirements\\n\`\`\`\\n\\n### Summary\\n\\n${l.title} is a key topic in ${courseTitle}. Practice with ${tech} to build real-world applications.`,
+        content: `## ${l.title}\\n\\n### Overview\\n\\n${
+          l.title
+        } explores ${chapterTitle.toLowerCase()} in the context of ${courseTitle} using ${tech}. This is${
+          i === 0 ? ' your starting point for understanding the fundamental concepts.' :
+          i === 1 ? ' where you will dive deeper into practical implementations and patterns.' :
+          i === 2 ? ' focused on applying the concepts in real-world scenarios.' :
+          i === 3 ? ' for mastering advanced techniques and optimizations.' :
+          ' where you learn industry-standard approaches and common pitfalls to avoid.'
+        }\\n\\n### Prerequisites\\n\\n- Basic familiarity with ${tech}\\n- Development environment ready for ${lang}\\n\\n\`\`\`bash\\n${
+          setupCommands[lang] || setupCommands.javascript
+        }\\n\`\`\`\\n\\n### What You'll Learn\\n\\n- Core principles of ${chapterTitle.toLowerCase()} with ${tech}\\n- How to implement and integrate it in your projects\\n- Common patterns, best practices, and debugging tips\\n\\n### Key Points\\n\\n- Start with small examples to build understanding\\n- Follow official ${tech} documentation for details\\n- Test each implementation before moving forward\\n\\n### Next Steps\\n\\nProceed to the next lesson to expand on these concepts with practical examples and hands-on exercises.`,
       }));
     }
   }
