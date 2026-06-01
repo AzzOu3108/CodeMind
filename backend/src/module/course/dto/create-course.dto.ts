@@ -6,6 +6,8 @@ import {
   IsBoolean,
   IsEnum,
   IsIn,
+  Min,
+  Max,
 } from 'class-validator';
 
 import { TECH_STACKS } from '../tech-stacks';
@@ -29,6 +31,8 @@ export class CreateCourseDto {
 
   @IsNotEmpty()
   @IsInt()
+  @Min(1)
+  @Max(20)
   chapiter_count: number;
 
   @IsBoolean()

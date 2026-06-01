@@ -18,6 +18,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(500000)
   avatar?: string;
 
   @IsOptional()

@@ -66,7 +66,7 @@ export class CourseService {
     );
 
     if (cached) {
-      return this.findOne(cached.id);
+      return this.findOne(cached.id, userId);
     }
 
     const chapiterTitles = await this.aiService.generateChapterTitles(
@@ -158,7 +158,7 @@ export class CourseService {
     }
 
     // return full formatted response
-    const fullCourse = await this.findOne(savedCourse.id);
+    const fullCourse = await this.findOne(savedCourse.id, userId);
     return fullCourse;
   }
 
@@ -206,8 +206,9 @@ export class CourseService {
     };
   }
 
-  async findAll() {
+  async findAll(userId: number) {
     const courses = await this.courseRepo.find({
+      where: { user: { id: userId } },
       order: { created_at: 'DESC' },
       relations: {
         chapiters: {
@@ -218,9 +219,9 @@ export class CourseService {
     return courses.map((c) => this.formatCourseResponse(c));
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId: number) {
     const course = await this.courseRepo.findOne({
-      where: { id },
+      where: { id, user: { id: userId } },
       relations: {
         chapiters: {
           lessons: true,
@@ -239,9 +240,9 @@ export class CourseService {
     return this.formatCourseResponse(course);
   }
 
-  async remove(courseId: number): Promise<void> {
+  async remove(courseId: number, userId:number): Promise<void> {
     const course = await this.courseRepo.findOne({
-      where: { id: courseId },
+      where: { id: courseId, user:{ id: userId } },
     });
 
     if (!course) {

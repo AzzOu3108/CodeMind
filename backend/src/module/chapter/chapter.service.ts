@@ -22,8 +22,9 @@ export class ChapterService {
   async create(
     courseId: number,
     chapiter: CreateChapterDto[],
+    userId: number,
   ): Promise<Chapiter[]> {
-    const course = await this.courseService.findOne(courseId);
+    const course = await this.courseService.findOne(courseId, userId);
 
     if (!course) {
       throw new NotFoundException('Course not found');

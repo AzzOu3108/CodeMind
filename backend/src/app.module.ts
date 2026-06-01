@@ -13,9 +13,14 @@ import { AuthModule } from './auth/auth.module';
 import { AiModule } from './ai/ai.module';
 import { YoutubeModule } from './youtube/youtube.module';
 import { LessonModule } from './module/lesson/lesson.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 60,
+    }]),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig],

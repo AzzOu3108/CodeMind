@@ -8,6 +8,7 @@ import {
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
@@ -24,6 +25,7 @@ export class CourseController {
     private readonly youtubeService: YoutubeService,
   ) {}
 
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post()
   create(
     @GetUserId() userId: number,
@@ -33,8 +35,8 @@ export class CourseController {
   }
 
   @Get()
-  findAll() {
-    return this.courseService.findAll();
+  findAll(@GetUserId() userId: number) {
+    return this.courseService.findAll(userId);
   }
 
   @Get('test-models')
@@ -52,12 +54,18 @@ export class CourseController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.courseService.findOne(id);
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUserId() userId: number,
+  ) {
+    return this.courseService.findOne(id, userId);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.courseService.remove(id);
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUserId() userId: number,
+  ) {
+    return this.courseService.remove(id, userId);
   }
 }
