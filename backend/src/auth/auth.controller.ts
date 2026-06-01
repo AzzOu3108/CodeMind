@@ -7,6 +7,7 @@ import {
   Res,
   Get,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
@@ -19,6 +20,7 @@ export class AuthController {
     private readonly userService: UserService,
   ) {}
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: any) {
     const user = await this.authService.validateUser(dto.email, dto.password);
@@ -37,7 +39,7 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return { message: 'Login successful', accessToken, refreshToken };
+    return { message: 'Login successful' };
   }
 
   @Post('refresh')
@@ -60,7 +62,7 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return { accessToken };
+    return { message: 'Token refreshed' };
   }
 
   @UseGuards(JwtAuthGuard)
