@@ -8,9 +8,7 @@ import About from "./components/About";
 import Footer from "./components/Footer";
 import Hero from "./components/Hero";
 import { useEffect } from "react";
-import Techstack from "./components/Techstack";
 import TechStack from "./components/Techstack";
-import DashboardContent from "./dashboard/components/DashboardContent";
 
 export default function Home() {
 
@@ -21,15 +19,24 @@ export default function Home() {
   }, [])
   
   return (
-    <div className="px-5 lg:px-32 sm:px-20">
-      <NavBar />
-      <main>
-      <Hero />
+    <div>
+      <div className="relative">
+        <Image
+          src="/assets/bg-hero-section.svg"
+          alt=""
+          fill
+          className="object-cover -z-10"
+          priority
+        />
+        <NavBar />
+        <main>
+          <Hero />
+        </main>
+      </div>
       <Features />
       <Courses />
       <TechStack />
       <About />
-      </main>
       <Footer />
     </div>
   );

@@ -3,9 +3,10 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import BlurBackground from './ui/BlurBackground'
-import { ArrowDown, Check } from 'lucide-react'
+import { ArrowDown, ArrowRight, Check } from 'lucide-react'
 import Button from './ui/Button'
 import Link from 'next/link'
+import Image from 'next/image'
 
 const SPRING: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
@@ -16,9 +17,9 @@ const fadeUp = (delay: number) => ({
 })
 
 const features = [
+  "100% Free",
   "Personalized Roadmap",
-  "100% Free for Everyone",
-  "Learn by Doing (with Quests)",
+  "Learn by Doing",
 ]
 
 export default function Hero() {
@@ -28,24 +29,31 @@ export default function Hero() {
       className="relative h-screen flex justify-center"
     >
       <div className="pointer-events-none">
-        <BlurBackground />
+        <Image
+        src="/assets/bg-hero-section.svg"
+        alt=""
+        fill
+        className="object-cover -z-30"
+        priority
+      />
       </div>
 
       <div className="text-center z-10 mt-20 md:mt-20 lg:mt-32 2xl:mt-48">
 
         {/* Heading */}
+        <p className='text-primary pb-4 font-semibold'>2,000+ learners!</p>
         <motion.h1
           {...fadeUp(0)}
           className="text-3xl md:text-3xl lg:text-4xl 2xl:text-5xl font-bold pb-10"
         >
-          Learn Programming & Algorithms Smarter with AI
+          From Beginner to Pro
+          <br />
+          Learn Programming with AI
         </motion.h1>
 
         {/* Subheading */}
-        <motion.p {...fadeUp(0.15)} className="pb-10 xl:text-xl">
-          Dive into beginner-friendly programming and algorithm courses uniquely crafted for you
-          <br />
-          with the power of AI.
+        <motion.p {...fadeUp(0.15)} className="pb-6 sm:pb-10 text-sm sm:text-base xl:text-xl text-gray-600">
+          Practice, build, and improve with an AI that adapts to your level
         </motion.p>
 
         {/* CTA Button */}
@@ -58,10 +66,12 @@ export default function Hero() {
           <Button
             type="button"
             aria-label="Get started free"
-            size="lg"
-            className="shadow-xl font-bold"
+            size="md"
+            className="shadow-xl font-semibold"
           >
-            <Link href="/auth/signup">Get Started Free</Link>
+            <Link href="/auth/signup" className="inline-flex items-center gap-2">
+              Start Free Learning <ArrowRight size={20} strokeWidth={2.5} />
+            </Link>
           </Button>
         </motion.div>
 

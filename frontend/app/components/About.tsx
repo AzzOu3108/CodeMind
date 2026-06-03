@@ -13,7 +13,7 @@ export default function About() {
   return (
     <section
       id='about'
-      className='relative min-h-screen flex-col items-center justify-center md:scroll-m-28'
+      className='relative min-h-screen flex-col items-center justify-center md:scroll-m-28 px-5 lg:px-32 sm:px-20'
     >
       <div className='pointer-events-none'>
         <BlurBackground width={902} height={400} />

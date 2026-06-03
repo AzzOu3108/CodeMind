@@ -20,7 +20,7 @@ export default function Courses() {
   return (
     <section
       id='courses'
-      className='relative min-h-screen scroll-m-5'>
+      className='relative min-h-screen scroll-m-5 px-5 lg:px-32 sm:px-20'>
       <div className='pointer-events-none absolute inset-0 z-0'>
         <BlurBackground width={902} height={369} />
       </div>

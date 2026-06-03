@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <section
     id='footer'
-    className='relative h-1/2 w-screen bg-[#c9a8f110] -mx-5 sm:-mx-20 lg:-mx-32'
+    className='relative h-1/2 w-screen bg-[#c9a8f110]'
     >
       <div className='pt-7 px-12'>
         
