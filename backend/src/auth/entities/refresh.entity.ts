@@ -1,23 +1,25 @@
 import { User } from 'src/module/user/entities/user.entity';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity('refresh_tokens')
 export class RefreshToken {
+  @ApiProperty({ description: 'Unique refresh token ID' })
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ApiProperty({ description: 'Bcrypt hash of the refresh token', nullable: true })
   @Column({ type: 'varchar', nullable: true })
   token_hash: string | null;
 
+  @ApiProperty({ description: 'Token creation timestamp' })
   @CreateDateColumn({
     name: 'created_at',
     type: 'timestamp',
@@ -25,6 +27,7 @@ export class RefreshToken {
   })
   created_at: Date;
 
+  @ApiProperty({ description: 'Token expiration timestamp', nullable: true })
   @Column({
     name: 'expires_at',
     type: 'timestamp',

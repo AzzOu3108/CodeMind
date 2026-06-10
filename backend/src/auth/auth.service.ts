@@ -33,7 +33,7 @@ export class AuthService {
       { sub: userId, email: user.email ?? '', name: user.fullname ?? '' },
       {
         secret: process.env.JWT_SECRET ?? 'default_jwt_secret',
-        expiresIn: '15m',
+        expiresIn: '1d',
       },
     );
 

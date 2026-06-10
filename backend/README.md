@@ -1,98 +1,202 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# CodeMind API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+The backend API for **CodeMind** — an AI-powered course generation platform. Create full courses with AI-generated chapters, lessons, and optional YouTube video recommendations tailored to your chosen tech stack and difficulty level.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tech Stack
 
-## Description
+| Category  | Technology |
+|-----------|------------|
+| Framework | [NestJS](https://nestjs.com/) 11 |
+| Language  | TypeScript 5 |
+| ORM       | TypeORM 0.3 |
+| Database  | PostgreSQL |
+| Auth      | JWT (access + refresh tokens) with Passport.js |
+| AI        | Groq SDK (LLaMA 3.3 70B) |
+| YouTube   | YouTube Data API v3 |
+| Validation| class-validator + class-transformer |
+| Security  | Helmet, rate limiting (@nestjs/throttler) |
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Features
 
-## Project setup
+- **JWT Authentication** — login, register, refresh token rotation, httpOnly cookies
+- **AI-Generated Courses** — create full course structures with chapter titles, descriptions, and lesson content automatically generated via Groq LLaMA
+- **Difficulty-Adaptive Content** — beginner, intermediate, and advanced levels with tailored explanations and code examples
+- **Multi Tech-Stack Support** — 17 tech stacks including NestJS, Spring Boot, Django, React, Flutter, and more
+- **YouTube Integration** — auto-search and attach relevant video recommendations to each lesson
+- **Rate Limiting** — 60 req/min global, 5 req/min on auth, 3 req/min on course creation
+- **Swagger Docs** — interactive API documentation at `/api`
 
-```bash
-$ npm install
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) 18+
+- [PostgreSQL](https://www.postgresql.org/) 14+
+- npm or yarn
+
+## Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+# Database
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=your_password
+DATABASE_NAME=codemind
+
+# JWT
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+
+# API Keys
+GROQ_API_KEY=your_groq_api_key
+YOUTUBE_API_KEY=your_youtube_api_key
+
+# App
+PORT=8000
+CORS_ORIGIN=http://localhost:3000
 ```
 
-## Compile and run the project
+## Installation
+
+```bash
+npm install
+```
+
+## Database Setup
+
+The application uses **synchronize: true** in development, so tables are auto-created on startup. Ensure your PostgreSQL instance is running and the database exists.
+
+```bash
+# Create the database
+createdb codemind
+```
+
+## Running the App
 
 ```bash
 # development
-$ npm run start
+npm run start
 
 # watch mode
-$ npm run start:dev
+npm run start:dev
 
-# production mode
-$ npm run start:prod
+# production
+npm run start:prod
 ```
 
-## Run tests
+The server starts at `http://localhost:8000`.
+
+## API Documentation
+
+Once the server is running, visit:
+
+```
+http://localhost:8000/api
+```
+
+Interactive Swagger UI with full request/response schemas, example values, and the ability to test endpoints directly.
+
+> **Note:** Auth uses httpOnly cookies. Register via `POST /user`, then login via `POST /auth/login`. Cookies are automatically sent on subsequent requests in Swagger UI.
+
+## API Endpoints
+
+### Health
+
+| Method | Path          | Auth     | Description          |
+|--------|---------------|----------|----------------------|
+| GET    | `/`           | Public   | Health check         |
+| GET    | `/cookies`    | Public   | Debug cookie state   |
+
+### Authentication
+
+| Method | Path              | Auth     | Rate Limit | Description                     |
+|--------|-------------------|----------|------------|---------------------------------|
+| POST   | `/auth/login`     | Public   | 5/min      | Login, receives httpOnly cookies|
+| POST   | `/auth/refresh`   | Public   | 5/min      | Refresh access token via cookie |
+| POST   | `/auth/logout`    | JWT      | —          | Clear auth cookies              |
+| GET    | `/auth/me`        | JWT      | —          | Get current user profile        |
+
+### Users
+
+| Method | Path          | Auth     | Description                  |
+|--------|---------------|----------|------------------------------|
+| POST   | `/user`       | Public   | Register a new user          |
+| PATCH  | `/user/me`    | JWT      | Update own profile           |
+| DELETE | `/user/me`    | JWT      | Delete own account           |
+
+### Courses
+
+| Method | Path              | Auth     | Rate Limit | Description                      |
+|--------|-------------------|----------|------------|----------------------------------|
+| POST   | `/course`         | JWT      | 3/min      | Create course with AI content    |
+| GET    | `/course`         | JWT      | —          | List user's courses              |
+| GET    | `/course/:id`     | JWT      | —          | Get course with chapters/lessons |
+| DELETE | `/course/:id`     | JWT      | —          | Delete a course                  |
+
+### Chapters
+
+| Method | Path                    | Auth     | Description                  |
+|--------|-------------------------|----------|------------------------------|
+| POST   | `/chapiter/:courseId`   | JWT      | Create chapters for a course |
+
+## Project Structure
+
+```
+src/
+├── main.ts                    # Bootstrap, middleware, Swagger setup
+├── app.module.ts              # Root module
+├── app.controller.ts          # Health check & debug endpoints
+│
+├── config/
+│   └── database.config.ts     # PostgreSQL connection config
+│
+├── auth/                      # Authentication module
+│   ├── auth.controller.ts     # login, refresh, logout, me
+│   ├── auth.service.ts        # JWT & bcrypt logic
+│   ├── jwt.strategy.ts        # Passport JWT strategy (header + cookie)
+│   ├── guards/                # JwtAuthGuard, JwtRefreshGuard
+│   ├── decorators/            # @CurrentUser()
+│   ├── dto/                   # LoginDto, RefreshDto
+│   ├── entities/              # RefreshToken entity
+│   └── interfaces/            # JwtPayload type
+│
+├── ai/                        # AI content generation module
+│   ├── ai.module.ts
+│   └── ai.service.ts          # Groq integration for course content
+│
+├── youtube/                   # YouTube integration module
+│   ├── youtube.module.ts
+│   └── youtube.service.ts     # YouTube Data API v3 search
+│
+├── common/                    # Shared utilities
+│   └── pipes/
+│       ├── trim/              # TrimPipe — trims string fields
+│       └── decorators/        # @GetUserId()
+│
+└── module/                    # Domain modules
+    ├── user/                  # User CRUD
+    ├── course/                # Course CRUD + AI generation orchestration
+    ├── chapter/               # Chapter CRUD
+    ├── lesson/                # Lesson entity
+    ├── progress/              # Progress tracking entity
+    ├── resources/             # Resource entity
+    └── chapter_resources/     # Chapter-Resource join entity
+```
+
+## Testing
 
 ```bash
 # unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
+npm run test
 
 # test coverage
-$ npm run test:cov
+npm run test:cov
+
+# e2e tests
+npm run test:e2e
 ```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+UNLICENSED — All Rights Reserved. Proprietary code for client project.
