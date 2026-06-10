@@ -8,11 +8,18 @@ import {
   Get,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
 import { UserService } from 'src/module/user/user.service';
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -22,6 +29,9 @@ export class AuthController {
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiResponse({ status: 201, description: 'Login successful, tokens set as httpOnly cookies' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: any) {
     const user = await this.authService.validateUser(dto.email, dto.password);
     const { accessToken, refreshToken } = await this.authService.login(user.id);
@@ -42,7 +52,11 @@ export class AuthController {
     return { message: 'Login successful' };
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token using refresh_token cookie' })
+  @ApiResponse({ status: 201, description: 'Token refreshed successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   async refresh(@Req() req, @Res({ passthrough: true }) res: any) {
     const refreshToken = req.cookies?.refresh_token;
     const { accessToken, refreshToken: newRefreshToken } =
@@ -67,6 +81,9 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Logout and clear auth cookies' })
+  @ApiResponse({ status: 201, description: 'Logged out successfully' })
   logout(@Req() req, @Res({ passthrough: true }) res: any) {
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
@@ -75,6 +92,10 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'Returns the authenticated user profile' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getProfile(@Req() req) {
     return this.userService.findOne(req.user.id);
   }

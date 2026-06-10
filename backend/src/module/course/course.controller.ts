@@ -9,24 +9,26 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 import { GetUserId } from 'src/common/pipes/decorators/get-user-id.decorator';
-import { AiService } from 'src/ai/ai.service';
-import { YoutubeService } from 'src/youtube/youtube.service';
 
+@ApiTags('Courses')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT-auth')
 @Controller('course')
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
-    private readonly aiService: AiService,
-    private readonly youtubeService: YoutubeService,
   ) {}
 
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post()
+  @ApiOperation({ summary: 'Create a new course with AI-generated content' })
+  @ApiResponse({ status: 201, description: 'Course created with chapters, lessons, and optional videos' })
+  @ApiResponse({ status: 429, description: 'Rate limit exceeded (3 per minute)' })
   create(
     @GetUserId() userId: number,
     @Body() createCourseDto: CreateCourseDto,
@@ -35,25 +37,16 @@ export class CourseController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'List all courses for the authenticated user' })
+  @ApiResponse({ status: 200, description: 'Returns user courses' })
   findAll(@GetUserId() userId: number) {
     return this.courseService.findAll(userId);
   }
 
-  @Get('test-models')
-  testAi() {
-    return this.aiService.generateChapterTitles('Python', 3, 'beginner');
-  }
-
-  @Get('test-youtube')
-  testYoutube() {
-    return this.youtubeService.searchVideo(
-      'introduction',
-      'Design patterns',
-      'advance',
-    );
-  }
-
   @Get(':id')
+  @ApiOperation({ summary: 'Get a single course with chapters and lessons' })
+  @ApiResponse({ status: 200, description: 'Returns the course with nested content' })
+  @ApiResponse({ status: 404, description: 'Course not found' })
   findOne(
     @Param('id', ParseIntPipe) id: number,
     @GetUserId() userId: number,
@@ -62,6 +55,9 @@ export class CourseController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete a course' })
+  @ApiResponse({ status: 200, description: 'Course deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Course not found' })
   remove(
     @Param('id', ParseIntPipe) id: number,
     @GetUserId() userId: number,
