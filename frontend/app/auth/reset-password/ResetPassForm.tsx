@@ -42,7 +42,7 @@ export default function ResetPassForm() {
         setFormData({ password: "", confirmPassword: "" })
       }
 
-    } catch (err) {
+    } catch {
       toast.error("An unexpected error occurred. Please try again.")
     }
   }

@@ -5,7 +5,7 @@ import LoginForm from './LoginForm'
 export default function page() {
   return (
     <div className='flex items-center justify-center min-h-screen'>
-          <AuthCard title='Login to'>
+          <AuthCard title='Welcome back'>
             <LoginForm />
           </AuthCard>
         </div>

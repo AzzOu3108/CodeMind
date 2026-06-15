@@ -1,5 +1,6 @@
 "use client"
 
+import Image from 'next/image'
 import React from 'react'
 import { motion } from 'framer-motion'
 import Cards from './Cards'
@@ -10,17 +11,17 @@ const courses = [
   {
     title: "Python Basics",
     description: "Learn Python from scratch with easy, AI-guided lessons perfect for beginners and career switchers.",
-    icon: <img src="/assets/python-svgrepo-com.svg" alt="Python" className="w-10 h-10" />
+    icon: <Image src="/assets/python-svgrepo-com.svg" alt="Python" width={40} height={40} className="w-10 h-10" />
   },
   {
     title: "Backend with Node.js",
     description: "Build fast, scalable backend applications using JavaScript and modern development practices.",
-    icon: <img src="/assets/nodejs-icon-logo-svgrepo-com.svg" alt="Node.js" className="w-10 h-10" />
+    icon: <Image src="/assets/nodejs-icon-logo-svgrepo-com.svg" alt="Node.js" width={40} height={40} className="w-10 h-10" />
   },
   {
     title: "JavaScript Essentials",
     description: "Understand the language of the web and start building interactive websites step-by-step.",
-    icon: <img src="/assets/javascript-svgrepo-com.svg" alt="JavaScript" className="w-10 h-10" />
+    icon: <Image src="/assets/javascript-svgrepo-com.svg" alt="JavaScript" width={40} height={40} className="w-10 h-10" />
   }
 ]
 

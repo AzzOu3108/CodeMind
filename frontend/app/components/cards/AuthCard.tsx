@@ -4,22 +4,24 @@ import React from 'react'
 
 export default function AuthCard({
     title,
-    children
+    children,
+    inline
 }: {
     title: string;
-    children: React.ReactNode
+    children: React.ReactNode;
+    inline?: boolean
 }
 ) {
   return (
-    <div className="flex flex-col items-center justify-start bg-white backdrop-blur-md shadow-lg py-5 px-18 rounded-2xl w-[500px] min-h-[560px]">
-        <div className="flex flex-col items-center mt-2 mb-6">
-            <div className="text-[35px] 2xl:text-[45px] hover:scale-125 transition-all ease-out duration-300">
+    <div className="flex flex-col items-center justify-start bg-white border-purple-300 border-2 backdrop-blur-md shadow-lg py-5 px-18 rounded-4xl w-[500px]">
+        <div className="flex flex-col items-center mt-0 mb-2">
+            <div className="text-[28px] 2xl:text-[35px] hover:scale-125 transition-all ease-out duration-300">
                 <Link href={'/'}>
                 <HeadCircuitIcon />
                 </Link>
             </div>
-            <h2 className="mt-2 text-xl font-semibold">
-                {title}{" "}
+            <h2 className="mt-0 text-2xl font-bold text-center">
+                {title}{" "}{inline ? " " : <br />}to
                 Code<span className='text-primary'>Mind</span>
             </h2>
         </div>
