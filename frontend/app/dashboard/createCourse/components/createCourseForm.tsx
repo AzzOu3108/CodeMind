@@ -12,10 +12,30 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import {
   Select, SelectContent, SelectItem,
   SelectTrigger, SelectValue,
 } from '@/components/ui/select'
+
+const TECH_STACKS = [
+  { value: 'spring-boot',    label: 'Spring Boot (Java)' },
+  { value: 'django',         label: 'Django (Python)' },
+  { value: 'flask',          label: 'Flask (Python)' },
+  { value: 'fastapi',        label: 'FastAPI (Python)' },
+  { value: 'express',        label: 'Express (Node.js)' },
+  { value: 'nestjs',         label: 'NestJS (Node.js/TypeScript)' },
+  { value: 'nextjs',         label: 'Next.js (React/Full Stack)' },
+  { value: 'aspnet',         label: 'ASP.NET Core (C#)' },
+  { value: 'laravel',        label: 'Laravel (PHP)' },
+  { value: 'rails',          label: 'Ruby on Rails' },
+  { value: 'go',             label: 'Go (Golang)' },
+  { value: 'react',          label: 'React' },
+  { value: 'vue',            label: 'Vue.js' },
+  { value: 'angular',        label: 'Angular' },
+  { value: 'flutter',        label: 'Flutter (Dart)' },
+  { value: 'react-native',   label: 'React Native' },
+]
 
 const DIFFICULTY_LEVELS = [
   { value: 'beginner', label: 'Beginner', color: 'bg-green-500' },
@@ -26,11 +46,27 @@ const DIFFICULTY_LEVELS = [
 export default function CreateCourseForm() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [techStack, setTechStack] = useState('')
   const [chapters, setChapters] = useState([5])
   const [difficulty, setDifficulty] = useState('beginner')
   const [includeVideo, setIncludeVideo] = useState(false)
 
   const selectedDifficulty = DIFFICULTY_LEVELS.find(d => d.value === difficulty)
+
+  const handleGenerate = () => {
+    const missing = []
+    if (!title.trim()) missing.push('Course Title')
+    if (!description.trim()) missing.push('Course Description')
+    if (!techStack) missing.push('Tech Stack')
+
+    if (missing.length > 0) {
+      toast.error(`Please fill in all required fields: ${missing.join(', ')}`)
+      return
+    }
+
+    // TODO: proceed with course generation
+    toast.success('Course generation started!')
+  }
 
   return (
     <div className='space-y-6'>
@@ -56,6 +92,30 @@ export default function CreateCourseForm() {
               className='focus-visible:ring-primary border-gray-200 mt-1'
               placeholder='e.g., Introduction to Machine Learning'
             />
+          </div>
+
+          <div>
+            <Label htmlFor="tech_stack">Tech Stack</Label>
+            <Select value={techStack} onValueChange={setTechStack}>
+              <SelectTrigger className="w-full border-gray-200 mt-1">
+                <SelectValue placeholder="Select a technology stack..." />
+              </SelectTrigger>
+              <SelectContent
+                position="popper"
+                sideOffset={4}
+                className='shadow-lg border-gray-100 bg-white min-w-[200px] animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-500 ease-out'
+              >
+                {TECH_STACKS.map(stack => (
+                  <SelectItem
+                    key={stack.value}
+                    value={stack.value}
+                    className='cursor-pointer transition-all duration-300 ease-in-out hover:bg-violet-50 hover:scale-[1.02] focus:bg-violet-50 focus:outline-none'
+                  >
+                    {stack.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -170,7 +230,7 @@ export default function CreateCourseForm() {
         className='cursor-pointer border-gray-300 hover:text-primary hover:bg-violet-100 duration-300 ease-out'>
           Cancel
         </Button>
-        <Button className='bg-violet-400 hover:bg-violet-300 text-white gap-2 cursor-pointer'>
+        <Button onClick={handleGenerate} className='bg-violet-400 hover:bg-violet-300 text-white gap-2 cursor-pointer'>
           <span>✦</span> Generate Course
         </Button>
       </div>
