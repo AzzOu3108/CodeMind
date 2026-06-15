@@ -61,6 +61,14 @@ export async function updateUser(data: {
   })
 }
 
+export async function getCourses() {
+  return apiFetch("/course", { method: "GET" })
+}
+
+export async function deleteCourse(id: number) {
+  return apiFetch(`/course/${id}`, { method: "DELETE" })
+}
+
 export async function deleteUser() {
   return apiFetch("/user/me", {
     method: "DELETE",
