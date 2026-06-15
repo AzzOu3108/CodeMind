@@ -137,6 +137,11 @@ export default function SignupForm() {
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
+
+            {/* Password length hint */}
+            {formData.password && formData.password.length < 6 && (
+              <p className="text-xs text-red-500 mt-1">Minimum 6 characters required</p>
+            )}
           </div>
 
           <div className="relative w-full">
@@ -158,6 +163,7 @@ export default function SignupForm() {
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
+
           </div>
 
           <div className="flex gap-3 mt-1">
