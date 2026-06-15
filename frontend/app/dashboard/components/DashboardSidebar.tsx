@@ -46,7 +46,7 @@ interface DashboardSidebarProps {
   onLogout?: () => void;
 }
 
-export function DashboardSidebar({ user, onLogout }: DashboardSidebarProps) {
+export function DashboardSidebar({ onLogout }: DashboardSidebarProps) {
     const pathname = usePathname();
   const { state, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -56,7 +56,7 @@ export function DashboardSidebar({ user, onLogout }: DashboardSidebarProps) {
     email: "",
     avatar: "",
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadUser() {

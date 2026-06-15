@@ -35,7 +35,7 @@ export default function About() {
           </h1>
           <p>
             AI Learn helps beginners master programming and algorithms with
-            personalized, AI-generated courses. Whether you're switching
+            personalized, AI-generated courses. Whether you&apos;re switching
             careers or starting fresh, we make learning simple, friendly,
             and effective.
           </p>

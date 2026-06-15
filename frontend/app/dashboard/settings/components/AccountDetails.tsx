@@ -150,9 +150,9 @@ export default function AccountDetails() {
       // clear password fields after successful save
       setPassword("")
       setConfirmPassword("")
-    } catch (error: any) {
+    } catch (error: unknown) {
       setSaveStatus("error")
-      setErrorMsg(error.message || "Something went wrong")
+      setErrorMsg(error instanceof Error ? error.message : "Something went wrong")
     } finally {
       setTimeout(() => setSaveStatus("idle"), 3000)
     }
@@ -351,7 +351,8 @@ export default function AccountDetails() {
                 circularCrop         // shows circular preview overlay
                 minWidth={50}
               >
-                <img
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                   ref={imgRef}
                   src={rawSrc}
                   alt="crop preview"

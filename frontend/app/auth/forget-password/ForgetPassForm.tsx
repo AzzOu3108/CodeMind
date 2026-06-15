@@ -27,7 +27,7 @@ export default function ForgetPassForm() {
         toast.success("Check your email to reset your password.")
         setFormData({ email: "" })
       }
-    } catch (err) {
+    } catch {
       toast.error("An unexpected error occurred. Please try again.")
     }
   }
@@ -47,7 +47,7 @@ export default function ForgetPassForm() {
         <div className='flex flex-col space-y-6'>
         <button
         type="submit"
-        className="mt-3 w-full bg-primary text-white font-semibold py-2 rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
+        className="mt-3 w-full bg-primary text-white font-semibold py-2 rounded-full hover:bg-primary/90 transition-colors cursor-pointer"
       >
         Reset password
       </button>

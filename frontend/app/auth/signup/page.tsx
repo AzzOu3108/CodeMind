@@ -5,7 +5,7 @@ import SignupForm from './SignupForm'
 export default function page() {
   return (
     <div className='flex items-center justify-center min-h-screen'>
-      <AuthCard title='Sign Up to'>
+      <AuthCard title='Sign up' inline>
         <SignupForm />
       </AuthCard>
     </div>
