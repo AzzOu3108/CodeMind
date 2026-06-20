@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Card, CardHeader, CardTitle, CardDescription,
   CardContent,
@@ -44,6 +45,7 @@ const DIFFICULTY_LEVELS = [
 ]
 
 export default function CreateCourseForm() {
+  const router = useRouter()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [techStack, setTechStack] = useState('')
@@ -64,8 +66,9 @@ export default function CreateCourseForm() {
       return
     }
 
-    // TODO: proceed with course generation
-    toast.success('Course generation started!')
+    // TODO: proceed with actual course generation API call
+    toast.success('Course created successfully!')
+    router.push('/dashboard')
   }
 
   return (
@@ -227,6 +230,7 @@ export default function CreateCourseForm() {
       <div className='flex justify-end gap-3 pb-8'>
         <Button 
         variant='outline'
+        onClick={() => router.push('/dashboard')}
         className='cursor-pointer border-gray-300 hover:text-primary hover:bg-violet-100 duration-300 ease-out'>
           Cancel
         </Button>
